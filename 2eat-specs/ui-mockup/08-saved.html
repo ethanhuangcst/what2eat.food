@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>what2eat.food</title>
+    <meta name="description" content="Restaurant picker when you cannot decide what to eat" data-i18n="eat.meta.description" />
+    <link rel="icon" href="assets/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body data-title-key="eat.saved.title">
+    <a class="sr-only" href="#content" data-i18n="eat.a11y.skip">Skip to content</a>
+    <header class="app-header">
+      <a class="logo" href="06-decide.html" aria-label="what2eat.food">
+        <span class="mark-host"><img class="mark" src="assets/food-logo.png" alt="" width="36" height="36" /></span>
+        <span class="logo-word">what2eat.food</span>
+      </a>
+      <button type="button" class="menu-toggle btn btn-quiet" data-i18n="eat.nav.menu">Menu</button>
+      <nav class="app-nav">
+        <a href="06-decide.html" data-i18n="eat.nav.decide">Decide</a>
+        <a href="07-profile.html" data-i18n="eat.nav.profile">Profile</a>
+        <a href="08-saved.html" class="is-active" data-i18n="eat.nav.saved">Saved</a>
+      </nav>
+      <div class="app-user">
+        <span class="hello" data-i18n="eat.header.hello" data-i18n-vars='{"name":"Mei"}'>Hello, Mei</span>
+        <span class="avatar" aria-hidden="true">M</span>
+        <div class="locale-switch" role="group" data-i18n="eat.a11y.locale" data-i18n-attr="aria-label">
+          <button type="button" data-locale="EN">EN</button>
+          <button type="button" data-locale="CN">CN</button>
+          <button type="button" data-locale="HK">HK</button>
+          <button type="button" data-locale="TW">TW</button>
+        </div>
+        <a class="btn btn-quiet" href="01-home.html" data-i18n="eat.nav.logout">Log out</a>
+      </div>
+    </header>
+
+    <main id="content" class="app-main">
+      <div class="toolbar">
+        <h1 data-i18n="eat.saved.title">Saved places</h1>
+      </div>
+
+      <div class="empty-state" data-empty hidden>
+        <span class="mark-host"><img class="mark" src="assets/food-logo.png" alt="" width="72" height="72" /></span>
+        <h2 data-i18n="eat.saved.empty">No saved places yet. Save from a card or details.</h2>
+        <p><a class="btn" href="06-decide.html" data-i18n="eat.home.cta">Find places</a></p>
+      </div>
+
+      <div class="pick-grid" data-results data-saved-list>
+        <article class="pick-card" data-testid="saved-joy">
+          <button type="button" class="pick-card__photo" data-open-dialog="dialog-details" data-i18n="eat.card.open_details" data-i18n-attr="aria-label">
+            <img src="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=480&amp;h=280&amp;fit=crop" alt="" width="480" height="280" loading="lazy" />
+          </button>
+          <div class="pick-card__body">
+            <header class="pick-card__head">
+              <h3 class="pick-card__name" data-i18n="eat.sample.place_a">St. JOHN</h3>
+              <span class="pick-card__rating" data-i18n="eat.card.rating" data-i18n-vars='{"score":"4.6"}'>4.6</span>
+            </header>
+            <div class="pick-card__sources">
+              <span class="source-id">AMAP</span>
+            </div>
+            <p class="pick-card__category" data-i18n="eat.card.category" data-i18n-vars='{"type":"restaurant"}'>restaurant</p>
+            <div class="pick-card__facts">
+              <p class="pick-card__address" data-i18n="eat.sample.place_a_address">26 St John Street, London EC1M 4AY</p>
+            </div>
+            <div class="pick-card__match">
+              <span class="pick-badge pick-badge--strong" data-i18n="eat.match.fit.strong">Strong fit</span>
+            </div>
+            <div class="pick-card__status">
+              <p class="pick-card__distance meta" data-i18n="eat.card.bff_distance" data-i18n-vars='{"minutes":"8"}'>8 min walk (from your pin)</p>
+            </div>
+            <div class="pick-card__actions">
+              <button type="button" class="pick-card__link" data-open-dialog="dialog-details" data-i18n="eat.card.open_details">Details</button>
+              <button type="button" class="pick-card__link pick-card__link--danger" data-unsave data-i18n="eat.card.unsave">Unsave</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="pick-card" data-testid="saved-dtf">
+          <button type="button" class="pick-card__photo" data-open-dialog="dialog-details" data-i18n="eat.card.open_details" data-i18n-attr="aria-label">
+            <img src="https://images.unsplash.com/photo-1585937421612-4a6471963327?w=480&amp;h=280&amp;fit=crop" alt="" width="480" height="280" loading="lazy" />
+          </button>
+          <div class="pick-card__body">
+            <header class="pick-card__head">
+              <h3 class="pick-card__name" data-i18n="eat.sample.place_b">Dishoom</h3>
+              <span class="pick-card__rating" data-i18n="eat.card.rating" data-i18n-vars='{"score":"4.4"}'>4.4</span>
+            </header>
+            <div class="pick-card__sources">
+              <span class="source-id">GOOGLE_MAPS</span>
+              <span class="source-id">TRIPADVISOR</span>
+            </div>
+            <p class="pick-card__category" data-i18n="eat.card.category" data-i18n-vars='{"type":"indian_restaurant"}'>indian_restaurant</p>
+            <div class="pick-card__facts">
+              <p class="pick-card__address" data-i18n="eat.sample.place_b_address">12 Upper St Martin's Lane, London WC2H 9FB</p>
+              <p class="pick-card__reviews meta" data-i18n="eat.card.tripadvisor" data-i18n-vars='{"score":"4.5","count":"8,420"}'>4.5 · 8,420 reviews</p>
+            </div>
+            <div class="pick-card__match">
+              <span class="pick-badge pick-badge--partial" data-i18n="eat.match.fit.partial">Partial fit</span>
+            </div>
+            <div class="pick-card__status">
+              <p class="pick-card__distance meta" data-i18n="eat.card.bff_distance" data-i18n-vars='{"minutes":"12"}'>12 min walk (from your pin)</p>
+            </div>
+            <div class="pick-card__actions">
+              <button type="button" class="pick-card__link" data-open-dialog="dialog-details" data-i18n="eat.card.open_details">Details</button>
+              <button type="button" class="pick-card__link pick-card__link--danger" data-unsave data-i18n="eat.card.unsave">Unsave</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <div class="dialog-backdrop" id="dialog-details" role="dialog" aria-modal="true" aria-labelledby="details-title">
+      <div class="dialog dialog--place">
+        <header class="place-dialog__bar">
+          <h2 id="details-title" class="place-dialog__heading" data-i18n="eat.details.dialog_title">Place details</h2>
+          <button type="button" class="btn btn-quiet" data-close-dialog data-i18n="eat.common.close" data-testid="details-close">Close</button>
+        </header>
+
+        <section class="place-panel place-panel--facts" aria-labelledby="place-facts-title">
+          <h3 id="place-facts-title" class="place-panel__title" data-i18n="eat.details.section_place">Restaurant details</h3>
+          <div class="place-split">
+            <div class="place-split__media">
+              <img
+                src="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=420&amp;h=320&amp;fit=crop"
+                alt=""
+                width="420"
+                height="320"
+                loading="lazy"
+              />
+            </div>
+            <div class="place-split__info">
+              <p class="place-split__name" data-i18n="eat.sample.place_a">St. JOHN</p>
+              <p class="place-split__meta">
+                <span class="place-split__rating" data-i18n="eat.card.rating" data-i18n-vars='{"score":"4.6"}'>4.6</span>
+                <span class="place-split__dot" aria-hidden="true">·</span>
+                <span data-i18n="eat.sample.place_a_cuisine">British</span>
+                <span class="place-split__dot" aria-hidden="true">·</span>
+                <span class="source-id">AMAP</span>
+              </p>
+              <dl class="place-facts-compact">
+                <div class="place-facts-compact__row">
+                  <dt data-i18n="eat.details.address">Address</dt>
+                  <dd data-i18n="eat.sample.place_a_address">26 St John Street, London EC1M 4AY</dd>
+                </div>
+                <div class="place-facts-compact__row">
+                  <dt data-i18n="eat.details.contact">Phone</dt>
+                  <dd data-i18n="eat.sample.place_a_phone">+44 20 7251 0848</dd>
+                </div>
+                <div class="place-facts-compact__row">
+                  <dt data-i18n="eat.details.hours">Hours</dt>
+                  <dd class="is-missing" data-i18n="eat.card.hours_unavailable">Hours not returned on search</dd>
+                </div>
+              </dl>
+              <p class="place-split__updated meta-mono" data-i18n="eat.details.updated" data-i18n-vars='{"time":"16:40"}'>Place facts last updated 16:40</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="place-panel place-panel--why" aria-labelledby="place-why-title">
+          <h3 id="place-why-title" class="place-panel__title" data-i18n="eat.details.why_title">Why this pick</h3>
+
+          <div class="place-why-stack">
+            <div class="place-why-upper">
+              <div class="place-why-block">
+                <h4 class="place-why-block__label" data-i18n="eat.why.reasons">Why it fits</h4>
+                <ul class="place-why-list">
+                  <li data-i18n="eat.why.reason_1">British menu, within your $$ band, 8 min walk from the pin.</li>
+                  <li data-i18n="eat.why.reason_2">Fits your weekend dinner context.</li>
+                </ul>
+              </div>
+              <div class="place-why-block">
+                <h4 class="place-why-block__label" data-i18n="eat.why.alts">Also nearby</h4>
+                <ul class="place-alt-list">
+                  <li>
+                    <a href="06-decide.html" data-i18n="eat.why.alt_1">The Wolseley — partial fit, longer wait</a>
+                  </li>
+                  <li>
+                    <a href="06-decide.html" data-i18n="eat.why.alt_2">Dishoom — Indian, 12 min walk</a>
+                  </li>
+                </ul>
+              </div>
+              <p class="place-why-note" data-i18n="eat.details.why_note">Confirm dishes and allergens with the restaurant — we do not have the menu here.</p>
+            </div>
+
+            <div class="place-why-chat chat" data-chat-root>
+              <h4 class="place-why-chat__label" data-i18n="eat.details.chat_title">Ask places-agent about this place</h4>
+              <div class="transcript place-why-chat__transcript" data-transcript>
+                <p class="bubble is-user" data-i18n="eat.chat.sample_user">Anything lighter nearby if we finish late?</p>
+                <p class="bubble">
+                  <span class="kind" data-i18n="eat.why.kind_model">Suggestion</span><br />
+                  <span data-i18n="eat.chat.sample_agent">Keeping St. JOHN selected: a quieter place two streets north is still likely open. I can reshuffle for late-night if you want.</span>
+                </p>
+              </div>
+              <form class="composer place-why-chat__composer" data-chat-form>
+                <label class="sr-only" for="place-chat-input" data-i18n="eat.chat.placeholder">Ask about this place or what else is nearby</label>
+                <input
+                  id="place-chat-input"
+                  data-chat-input
+                  data-i18n="eat.chat.placeholder"
+                  data-i18n-attr="placeholder"
+                  placeholder="Ask about this place or what else is nearby"
+                />
+                <button class="btn" type="submit" data-i18n="eat.chat.send">Send</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <div class="dialog-actions">
+          <a class="btn" href="https://www.google.com/maps/search/?api=1&amp;query=St.+JOHN+Restaurant+London" data-i18n="eat.card.open_map" data-i18n-href="eat.sample.place_a_map" target="_blank" rel="noopener">Open map</a>
+          <button type="button" class="btn btn-quiet" data-unsave data-close-dialog data-i18n="eat.card.unsave" data-testid="details-unsave">Unsave</button>
+        </div>
+      </div>
+    </div>
+    <footer class="family-footer family-footer--app">
+      <nav class="family-footer__row" aria-label="places.family">
+        <span class="family-footer__label">places.family:</span>
+        <a class="family-footer__link" href="../../../3.where2play/2play-specs/ui-mockup/01-home.html" target="_blank" rel="noopener noreferrer">
+          <img src="assets/play-logo.png" alt="" width="18" height="18" />
+          <span>where2play.place</span>
+        </a>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <span class="family-footer__current">
+          <img src="assets/food-logo.png" alt="" width="18" height="18" />
+          <span>what2eat.food</span>
+        </span>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <a class="family-footer__link" href="../../../1.places-agent/agent-specs/ui-mockup/01-home.html" target="_blank" rel="noopener noreferrer">
+          <img src="assets/agent-logo.png" alt="" width="18" height="18" />
+          <span>places.agent-mate.ai</span>
+        </a>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <span class="family-footer__copy" data-i18n="eat.footer.copyright">copyright © Ethan Huang</span>
+      </nav>
+    </footer>
+    <script src="assets/i18n.js"></script>
+    <script src="assets/mockup.js"></script>
+  </body>
+</html>

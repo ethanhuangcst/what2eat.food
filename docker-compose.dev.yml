@@ -1,0 +1,27 @@
+# Local dev Postgres for what2eat only. Started by `make up`.
+# Port registry: ../workspace-specs/6.deployment-plan.md §0
+# ADR-023 — do not reuse places-agent SQLite or other apps' Postgres DB names.
+
+name: what2eat-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: what2eat-postgres
+    restart: unless-stopped
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: what2eat
+      POSTGRES_PASSWORD: what2eat
+      POSTGRES_DB: what2eat
+    volumes:
+      - what2eat_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U what2eat -d what2eat"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  what2eat_pg_data:

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>what2eat.food</title>
+    <meta name="description" content="Restaurant picker when you cannot decide what to eat" data-i18n="eat.meta.description" />
+    <link rel="icon" href="assets/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body class="shell-public" data-title-key="eat.home.headline">
+    <a class="sr-only" href="#content" data-i18n="eat.a11y.skip">Skip to content</a>
+    <div class="shell-locale">
+      <div class="locale-switch" role="group" data-i18n="eat.a11y.locale" data-i18n-attr="aria-label">
+        <button type="button" data-locale="EN">EN</button>
+        <button type="button" data-locale="CN">CN</button>
+        <button type="button" data-locale="HK">HK</button>
+        <button type="button" data-locale="TW">TW</button>
+      </div>
+    </div>
+    <main id="content" class="home-main">
+      <a class="logo logo-home" href="01-home.html" aria-label="what2eat.food">
+        <span class="mark-host"><img class="mark" src="assets/food-logo.png" alt="" width="64" height="64" /></span>
+        <span class="logo-word">what2eat.food</span>
+      </a>
+      <h1 data-i18n="eat.home.headline">Still deciding what to eat?</h1>
+      <p class="lead" data-i18n="eat.home.lead">
+        Recommend restaurants based on your own preference!
+      </p>
+      <div class="mini-stack" aria-hidden="true">
+        <article class="plate-card">
+          <h2 data-i18n="eat.sample.place_a">St. JOHN</h2>
+          <p class="card-meta"><span class="eta">12 min</span><span class="price">$$</span></p>
+        </article>
+        <article class="plate-card">
+          <h2 data-i18n="eat.sample.place_b">The Wolseley</h2>
+          <p class="card-meta"><span class="eta">8 min</span><span class="price">$$</span></p>
+        </article>
+      </div>
+      <div class="cta-row">
+        <a class="btn" href="02-register.html" data-i18n="eat.home.cta" data-testid="home-cta">Find places</a>
+        <a class="btn btn-quiet" href="03-login.html" data-i18n="eat.home.login">Sign in</a>
+      </div>
+      <p><a href="02-register.html" data-i18n="eat.home.register">Create account</a></p>
+    </main>
+    <footer class="family-footer">
+      <nav class="family-footer__row" aria-label="places.family">
+        <span class="family-footer__label">places.family:</span>
+        <a class="family-footer__link" href="../../../3.where2play/2play-specs/ui-mockup/01-home.html" target="_blank" rel="noopener noreferrer">
+          <img src="assets/play-logo.png" alt="" width="18" height="18" />
+          <span>where2play.place</span>
+        </a>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <span class="family-footer__current">
+          <img src="assets/food-logo.png" alt="" width="18" height="18" />
+          <span>what2eat.food</span>
+        </span>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <a class="family-footer__link" href="../../../1.places-agent/agent-specs/ui-mockup/01-home.html" target="_blank" rel="noopener noreferrer">
+          <img src="assets/agent-logo.png" alt="" width="18" height="18" />
+          <span>places.agent-mate.ai</span>
+        </a>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <span class="family-footer__copy" data-i18n="eat.footer.copyright">copyright © Ethan Huang</span>
+      </nav>
+    </footer>
+    <script src="assets/i18n.js"></script>
+    <script src="assets/mockup.js"></script>
+  </body>
+</html>

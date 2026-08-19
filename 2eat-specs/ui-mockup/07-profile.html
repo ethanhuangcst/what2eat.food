@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>what2eat.food</title>
+    <meta name="description" content="Restaurant picker when you cannot decide what to eat" data-i18n="eat.meta.description" />
+    <link rel="icon" href="assets/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="assets/mockup.css" />
+  </head>
+  <body data-title-key="eat.profile.page_title">
+    <a class="sr-only" href="#content" data-i18n="eat.a11y.skip">Skip to content</a>
+    <header class="app-header">
+      <a class="logo" href="06-decide.html" aria-label="what2eat.food">
+        <span class="mark-host"><img class="mark" src="assets/food-logo.png" alt="" width="36" height="36" /></span>
+        <span class="logo-word">what2eat.food</span>
+      </a>
+      <button type="button" class="menu-toggle btn btn-quiet" data-i18n="eat.nav.menu">Menu</button>
+      <nav class="app-nav">
+        <a href="06-decide.html" data-i18n="eat.nav.decide">Decide</a>
+        <a href="07-profile.html" class="is-active" data-i18n="eat.nav.profile">Profile</a>
+        <a href="08-saved.html" data-i18n="eat.nav.saved">Saved</a>
+      </nav>
+      <div class="app-user">
+        <span class="hello" data-i18n="eat.header.hello" data-i18n-vars='{"name":"Mei"}'>Hello, Mei</span>
+        <span class="avatar" aria-hidden="true">M</span>
+        <div class="locale-switch" role="group" data-i18n="eat.a11y.locale" data-i18n-attr="aria-label">
+          <button type="button" data-locale="EN">EN</button>
+          <button type="button" data-locale="CN">CN</button>
+          <button type="button" data-locale="HK">HK</button>
+          <button type="button" data-locale="TW">TW</button>
+        </div>
+        <a class="btn btn-quiet" href="01-home.html" data-i18n="eat.nav.logout">Log out</a>
+      </div>
+    </header>
+
+    <main id="content" class="app-main app-main--profile">
+      <h1 class="sr-only" data-i18n="eat.profile.page_title">Profile</h1>
+      <p class="callout is-info" data-personal-saved hidden data-i18n="eat.profile.personal_saved">Personal info saved</p>
+      <p class="callout is-info" data-profile-saved hidden data-i18n="eat.profile.saved">Tastes saved</p>
+
+      <div class="profile-stack">
+        <div class="register-card">
+          <header class="register-card__head">
+            <h2 data-i18n="eat.profile.personal">Personal information</h2>
+            <p class="meta" data-i18n="eat.profile.personal_updated" data-i18n-vars='{"time":"Mon 09:12"}'>Last saved Mon 09:12</p>
+          </header>
+
+          <form class="register-card__form" data-personal-form>
+            <div class="register-card__grid">
+              <div class="register-card__fields">
+                <div class="field">
+                  <label for="name" data-i18n="eat.register.name">Name</label>
+                  <input id="name" name="name" type="text" autocomplete="name" required value="Mei Chen" />
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label for="email" data-i18n="eat.register.email">Email</label>
+                    <span class="field-label-note" data-i18n="eat.register.email_hint">Used to sign in to your account.</span>
+                  </div>
+                  <input id="email" name="email" type="email" autocomplete="email" required value="mei@example.com" />
+                </div>
+
+                <div class="field-row field-row--demographics">
+                  <div class="field field--gender">
+                    <label for="gender" data-i18n="eat.register.gender">Gender</label>
+                    <select id="gender" name="gender">
+                      <option value="male" data-i18n="eat.register.gender_male">Male</option>
+                      <option value="female" selected data-i18n="eat.register.gender_female">Female</option>
+                      <option value="other" data-i18n="eat.register.gender_other">Other</option>
+                      <option value="skip" data-i18n="eat.register.gender_skip">Prefer not to say</option>
+                    </select>
+                  </div>
+                  <div class="field field--age">
+                    <label for="age" data-i18n="eat.register.age">Age</label>
+                    <input id="age" name="age" type="number" inputmode="numeric" min="13" max="120" required value="28" />
+                  </div>
+                </div>
+
+                <div class="field" data-location-field>
+                  <label for="location" data-i18n="eat.register.location">Default location</label>
+                  <p class="hint location-status is-ok" data-location-status role="status" data-i18n="eat.register.location_detected">Location detected</p>
+                  <div class="location-with-action">
+                    <div class="location-field">
+                      <input
+                        id="location"
+                        name="location"
+                        type="text"
+                        list="location-suggestions"
+                        autocomplete="off"
+                        value="Clerkenwell"
+                        data-i18n-value="eat.sample.area"
+                        data-i18n-placeholder="eat.register.location_placeholder"
+                        placeholder="City or neighbourhood"
+                      />
+                      <datalist id="location-suggestions"></datalist>
+                      <button
+                        type="button"
+                        class="location-detect"
+                        data-location-retry
+                        data-i18n="eat.register.location_use_current"
+                        data-i18n-attr="aria-label"
+                      >
+                        <svg class="icon-locate" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                          <circle cx="12" cy="12" r="3" />
+                          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                        </svg>
+                      </button>
+                    </div>
+                    <a
+                      class="btn btn-quiet location-with-action__reset"
+                      href="04-reset.html"
+                      data-i18n="eat.profile.reset_password"
+                      data-testid="profile-reset-password"
+                    >Reset password</a>
+                  </div>
+                  <p class="hint" data-location-failed hidden data-i18n="eat.register.location_failed">Could not detect location. Enter it manually.</p>
+                </div>
+              </div>
+
+              <aside class="register-card__photo" aria-labelledby="photo-label">
+                <p class="register-photo__eyebrow" id="photo-label" data-i18n="eat.register.photo">Photo (optional)</p>
+                <div class="register-photo" data-photo-panel>
+                  <input id="photo" name="photo" type="file" class="file-input-hidden" accept="image/*" tabindex="-1" aria-hidden="true" />
+                  <button type="button" class="register-photo__frame" data-photo-trigger data-photo-frame>
+                    <span class="register-photo__steam" aria-hidden="true"></span>
+                    <img class="register-photo__img" data-photo-img alt="" hidden />
+                    <span class="register-photo__placeholder" data-photo-placeholder aria-hidden="true">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                      </svg>
+                    </span>
+                    <span class="register-photo__cta" data-i18n="eat.register.photo_add">Add photo</span>
+                  </button>
+                  <p class="register-photo__name" data-photo-name data-i18n="eat.register.photo_none">No photo selected</p>
+                </div>
+              </aside>
+            </div>
+
+            <div class="register-card__actions">
+              <button class="btn register-card__submit" type="submit" data-i18n="eat.profile.personal_save" data-testid="personal-save">Save personal info</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="register-card">
+          <header class="register-card__head">
+            <h2 data-i18n="eat.profile.title">Your tastes</h2>
+            <p class="meta" data-i18n="eat.profile.updated" data-i18n-vars='{"time":"yesterday 21:10"}'>Last saved yesterday 21:10</p>
+          </header>
+
+          <form class="register-card__form" data-profile-form>
+            <div class="profile-tastes">
+              <section class="profile-tastes__block" aria-labelledby="likes-heading">
+                <h3 id="likes-heading" data-i18n="eat.profile.likes">Cuisines you like</h3>
+                <div class="chip-add" data-chip-add="likes">
+                  <div class="chip-row" data-chip-list>
+                    <button type="button" class="chip chip-toggle chip-like" aria-pressed="true" data-i18n="eat.cuisine.cantonese">Cantonese</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="true" data-i18n="eat.cuisine.japanese">Japanese</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.korean">Korean</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.italian">Italian</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.thai">Thai</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.sichuan">Sichuan</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.indian">Indian</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.vietnamese">Vietnamese</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.mexican">Mexican</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.french">French</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.seafood">Seafood</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.barbecue">Barbecue</button>
+                  </div>
+                  <div class="chip-add-row">
+                    <label class="sr-only" for="add-cuisine-like" data-i18n="eat.profile.add_cuisine">Add a cuisine</label>
+                    <input
+                      id="add-cuisine-like"
+                      type="text"
+                      data-chip-input
+                      maxlength="40"
+                      data-i18n-placeholder="eat.profile.add_cuisine_ph"
+                      placeholder="e.g. Sichuan hotpot"
+                    />
+                    <button type="button" class="btn btn-quiet" data-chip-add-btn data-i18n="eat.profile.add">Add</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="profile-tastes__block" aria-labelledby="dislikes-heading">
+                <h3 id="dislikes-heading" data-i18n="eat.profile.dislikes">Cuisines you skip</h3>
+                <div class="chip-add" data-chip-add="dislikes">
+                  <div class="chip-row" data-chip-list>
+                    <button type="button" class="chip chip-toggle chip-dislike" aria-pressed="true" data-i18n="eat.cuisine.hotpot">Hotpot</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.thai">Thai</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.fast_food">Fast food</button>
+                    <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.cuisine.buffet">Buffet</button>
+                  </div>
+                  <div class="chip-add-row">
+                    <label class="sr-only" for="add-cuisine-skip" data-i18n="eat.profile.add_cuisine">Add a cuisine</label>
+                    <input
+                      id="add-cuisine-skip"
+                      type="text"
+                      data-chip-input
+                      maxlength="40"
+                      data-i18n-placeholder="eat.profile.add_cuisine_ph"
+                      placeholder="e.g. Sichuan hotpot"
+                    />
+                    <button type="button" class="btn btn-quiet" data-chip-add-btn data-i18n="eat.profile.add">Add</button>
+                  </div>
+                </div>
+              </section>
+
+              <div class="profile-tastes__pair profile-tastes__pair--compact">
+                <section class="profile-tastes__tile profile-tastes__tile--compact" aria-labelledby="spice-heading">
+                  <h3 id="spice-heading" data-i18n="eat.profile.spice">Spice</h3>
+                  <div class="range-row range-row--compact">
+                    <span class="meta" data-i18n="eat.profile.spice_low">Mild</span>
+                    <input type="range" min="0" max="3" value="1" aria-labelledby="spice-heading" />
+                    <span class="meta" data-i18n="eat.profile.spice_high">Hot</span>
+                  </div>
+                </section>
+                <section class="profile-tastes__tile profile-tastes__tile--compact" aria-labelledby="party-heading">
+                  <h3 id="party-heading" data-i18n="eat.profile.party">Usual party size</h3>
+                  <div class="field field--party">
+                    <input id="party" name="party" type="number" min="1" max="12" value="2" aria-labelledby="party-heading" />
+                  </div>
+                </section>
+              </div>
+
+              <div class="profile-tastes__pair profile-tastes__pair--chips">
+                <section class="profile-tastes__tile" aria-labelledby="constraints-heading">
+                  <h3 id="constraints-heading" data-i18n="eat.profile.constraints">Hard constraints</h3>
+                  <div class="profile-tastes__body">
+                    <div class="chip-add" data-chip-add="constraints">
+                      <div class="chip-row" data-chip-list>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.profile.veg">Vegetarian</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.profile.no_pork">No pork</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="true" data-i18n="eat.profile.nut">Nut allergy (user-stated)</button>
+                      </div>
+                      <div class="chip-add-row">
+                        <label class="sr-only" for="add-constraint" data-i18n="eat.profile.add_constraint">Add a constraint</label>
+                        <input
+                          id="add-constraint"
+                          type="text"
+                          data-chip-input
+                          maxlength="40"
+                          data-i18n-placeholder="eat.profile.add_constraint_ph"
+                          placeholder="e.g. no shellfish"
+                        />
+                        <button type="button" class="btn btn-quiet" data-chip-add-btn data-i18n="eat.profile.add">Add</button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+                <section class="profile-tastes__tile" aria-labelledby="contexts-heading">
+                  <h3 id="contexts-heading" data-i18n="eat.profile.contexts">Meal contexts</h3>
+                  <div class="profile-tastes__body">
+                    <div class="chip-add" data-chip-add="contexts">
+                      <div class="chip-row" data-chip-list>
+                        <button type="button" class="chip chip-toggle" aria-pressed="true" data-i18n="eat.meal.weekday_lunch">Weekday lunch</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="true" data-i18n="eat.meal.weekend_dinner">Weekend dinner</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.quick">Quick bite</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.celebration">Celebration</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.family_dinner">Family dinner</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.dating">Dating</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.friends">Friends outing</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.business">Business meal</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.solo">Solo</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.brunch">Brunch</button>
+                        <button type="button" class="chip chip-toggle" aria-pressed="false" data-i18n="eat.meal.late_night">Late night</button>
+                      </div>
+                      <div class="chip-add-row">
+                        <label class="sr-only" for="add-context" data-i18n="eat.profile.add_context">Add a meal context</label>
+                        <input
+                          id="add-context"
+                          type="text"
+                          data-chip-input
+                          maxlength="40"
+                          data-i18n-placeholder="eat.profile.add_context_ph"
+                          placeholder="e.g. after-work drinks"
+                        />
+                        <button type="button" class="btn btn-quiet" data-chip-add-btn data-i18n="eat.profile.add">Add</button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+
+            <div class="register-card__actions">
+              <button class="btn register-card__submit" type="submit" data-i18n="eat.profile.save" data-testid="profile-save">Save tastes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+    <footer class="family-footer family-footer--app">
+      <nav class="family-footer__row" aria-label="places.family">
+        <span class="family-footer__label">places.family:</span>
+        <a class="family-footer__link" href="../../../3.where2play/2play-specs/ui-mockup/01-home.html" target="_blank" rel="noopener noreferrer">
+          <img src="assets/play-logo.png" alt="" width="18" height="18" />
+          <span>where2play.place</span>
+        </a>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <span class="family-footer__current">
+          <img src="assets/food-logo.png" alt="" width="18" height="18" />
+          <span>what2eat.food</span>
+        </span>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <a class="family-footer__link" href="../../../1.places-agent/agent-specs/ui-mockup/01-home.html" target="_blank" rel="noopener noreferrer">
+          <img src="assets/agent-logo.png" alt="" width="18" height="18" />
+          <span>places.agent-mate.ai</span>
+        </a>
+        <span class="family-footer__sep" aria-hidden="true">·</span>
+        <span class="family-footer__copy" data-i18n="eat.footer.copyright">copyright © Ethan Huang</span>
+      </nav>
+    </footer>
+    <script src="assets/i18n.js"></script>
+    <script src="assets/mockup.js"></script>
+  </body>
+</html>
