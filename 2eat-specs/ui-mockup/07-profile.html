@@ -24,20 +24,20 @@
       <div class="app-user">
         <span class="hello" data-i18n="eat.header.hello" data-i18n-vars='{"name":"Mei"}'>Hello, Mei</span>
         <span class="avatar" aria-hidden="true">M</span>
-        <div class="locale-switch" role="group" data-i18n="eat.a11y.locale" data-i18n-attr="aria-label">
-          <button type="button" data-locale="EN">EN</button>
-          <button type="button" data-locale="CN">CN</button>
-          <button type="button" data-locale="HK">HK</button>
-          <button type="button" data-locale="TW">TW</button>
+        <div class="app-user__tools">
+          <div class="locale-switch" role="group" data-i18n="eat.a11y.locale" data-i18n-attr="aria-label">
+            <button type="button" data-locale="EN">EN</button>
+            <button type="button" data-locale="CN">CN</button>
+            <button type="button" data-locale="HK">HK</button>
+            <button type="button" data-locale="TW">TW</button>
+          </div>
+          <a class="btn btn-quiet" href="01-home.html" data-i18n="eat.nav.logout">Log out</a>
         </div>
-        <a class="btn btn-quiet" href="01-home.html" data-i18n="eat.nav.logout">Log out</a>
       </div>
     </header>
 
     <main id="content" class="app-main app-main--profile">
       <h1 class="sr-only" data-i18n="eat.profile.page_title">Profile</h1>
-      <p class="callout is-info" data-personal-saved hidden data-i18n="eat.profile.personal_saved">Personal info saved</p>
-      <p class="callout is-info" data-profile-saved hidden data-i18n="eat.profile.saved">Tastes saved</p>
 
       <div class="profile-stack">
         <div class="register-card">
@@ -140,6 +140,7 @@
             </div>
 
             <div class="register-card__actions">
+              <p class="callout is-info" data-personal-saved hidden role="status" aria-live="polite" data-i18n="eat.profile.personal_saved">Personal info saved</p>
               <button class="btn register-card__submit" type="submit" data-i18n="eat.profile.personal_save" data-testid="personal-save">Save personal info</button>
             </div>
           </form>
@@ -287,6 +288,7 @@
             </div>
 
             <div class="register-card__actions">
+              <p class="callout is-info" data-profile-saved hidden role="status" aria-live="polite" data-i18n="eat.profile.saved">Tastes saved</p>
               <button class="btn register-card__submit" type="submit" data-i18n="eat.profile.save" data-testid="profile-save">Save tastes</button>
             </div>
           </form>

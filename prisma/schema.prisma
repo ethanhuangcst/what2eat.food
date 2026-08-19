@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String        @id @default(cuid())
+  email                String        @unique
+  passwordHash         String?
+  name                 String
+  gender               String?
+  age                  Int?
+  photoUrl             String?
+  defaultLocation      String?
+  locale               String        @default("EN")
+  resetTokenHash       String?
+  resetTokenExpiresAt  DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  tasteProfile         TasteProfile?
+  savedPlaces          SavedPlace[]
+  decisionHistory      DecisionHistory[]
+}
+
+model TasteProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes        Json     @default("[]")
+  dislikes     Json     @default("[]")
+  spiceLevel   String?
+  partySize    Int?
+  constraints  Json     @default("[]")
+  mealContexts Json     @default("[]")
+  updatedAt    DateTime @updatedAt
+}
+
+model SavedPlace {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider  String
+  nativeId  String
+  snapshot  Json
+  savedAt   DateTime @default(now())
+
+  @@unique([userId, provider, nativeId])
+  @@index([userId])
+}
+
+model DecisionHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  placeSnapshot Json
+  area        String?
+  mealContext String?
+  outcome     String   @default("decided")
+  decidedAt   DateTime @default(now())
+
+  @@index([userId, decidedAt])
+}
+
+model SearchCache {
+  id        String   @id @default(cuid())
+  userId    String
+  payload   Json
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+}

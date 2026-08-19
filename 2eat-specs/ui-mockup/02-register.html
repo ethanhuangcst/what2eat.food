@@ -36,17 +36,19 @@
               <div class="register-card__fields">
                 <p class="register-required-note" data-i18n="eat.register.required_note">Required fields are marked with *</p>
 
-                <div class="field">
+                <div class="field" data-field="name">
                   <label for="name" class="is-required" data-i18n="eat.register.name">Name</label>
                   <input id="name" name="name" type="text" autocomplete="name" required value="Mei Chen" />
+                  <p class="field-error" id="name-error" role="alert" data-field-error="name" hidden data-i18n="eat.errors.name_required">Enter your name.</p>
                 </div>
 
-                <div class="field">
+                <div class="field" data-field="email">
                   <div class="field-label-row">
                     <label for="email" class="is-required" data-i18n="eat.register.email">Email</label>
                     <span class="field-label-note" data-i18n="eat.register.email_hint">Used to sign in to your account.</span>
                   </div>
                   <input id="email" name="email" type="email" autocomplete="email" required value="mei@example.com" />
+                  <p class="field-error" id="email-error" role="alert" data-field-error="email" hidden data-i18n="eat.errors.email_taken">An account with this email already exists.</p>
                 </div>
 
                 <div class="field-row field-row--demographics">
@@ -60,8 +62,8 @@
                     </select>
                   </div>
                   <div class="field field--age">
-                    <label for="age" class="is-required" data-i18n="eat.register.age">Age</label>
-                    <input id="age" name="age" type="number" inputmode="numeric" min="13" max="120" required value="28" />
+                    <label for="age" data-i18n="eat.register.age">Age</label>
+                    <input id="age" name="age" type="number" inputmode="numeric" min="13" max="120" value="28" />
                   </div>
                 </div>
 
@@ -95,7 +97,7 @@
                   <p class="hint" data-location-failed hidden data-i18n="eat.register.location_failed">Could not detect location. Enter it manually.</p>
                 </div>
 
-                <div class="field">
+                <div class="field" data-field="password">
                   <label for="password" class="is-required" data-i18n="eat.register.password">Password</label>
                   <div class="password-field">
                     <input id="password" name="password" type="password" autocomplete="new-password" required />
@@ -119,9 +121,10 @@
                       </svg>
                     </button>
                   </div>
+                  <p class="field-error" id="password-error" role="alert" data-field-error="password" hidden data-i18n="eat.errors.password_too_short">Use at least 8 characters.</p>
                 </div>
 
-                <div class="field">
+                <div class="field" data-field="password_confirm">
                   <label for="password_confirm" class="is-required" data-i18n="eat.register.password_confirm">Confirm password</label>
                   <div class="password-field">
                     <input id="password_confirm" name="password_confirm" type="password" autocomplete="new-password" required />
@@ -145,7 +148,7 @@
                       </svg>
                     </button>
                   </div>
-                  <p class="error" data-register-password-error hidden role="alert" data-i18n="eat.errors.password_mismatch">The two passwords do not match.</p>
+                  <p class="field-error" id="password-confirm-error" role="alert" data-field-error="password_confirm" data-register-password-error hidden data-i18n="eat.errors.password_mismatch">The two passwords do not match.</p>
                 </div>
               </div>
 

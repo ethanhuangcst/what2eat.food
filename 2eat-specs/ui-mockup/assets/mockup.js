@@ -240,21 +240,43 @@
     var form = document.querySelector("[data-register-form]");
     if (!form) return;
     var err = document.querySelector("[data-register-password-error]");
+    var confirmField = document.querySelector('[data-field="password_confirm"]');
     var pw = document.getElementById("password");
     var confirm = document.getElementById("password_confirm");
-    function clearError() {
+    function clearMismatch() {
       if (err) err.hidden = true;
+      if (confirmField) confirmField.classList.remove("is-invalid");
+      if (confirm) confirm.removeAttribute("aria-invalid");
     }
-    if (pw) pw.addEventListener("input", clearError);
-    if (confirm) confirm.addEventListener("input", clearError);
+    if (pw) pw.addEventListener("input", clearMismatch);
+    if (confirm) confirm.addEventListener("input", clearMismatch);
     form.addEventListener("submit", function (e) {
       if (!pw || !confirm) return;
       if (pw.value !== confirm.value) {
         e.preventDefault();
         if (err) err.hidden = false;
-        confirm.focus();
+        if (confirmField) confirmField.classList.add("is-invalid");
+        if (confirm) {
+          confirm.setAttribute("aria-invalid", "true");
+          confirm.setAttribute("aria-describedby", "password-confirm-error");
+          confirm.focus();
+        }
       }
     });
+  }
+
+  function showRegisterFieldError(fieldName, errorKey) {
+    var field = document.querySelector('[data-field="' + fieldName + '"]');
+    var message = document.querySelector('[data-field-error="' + fieldName + '"]');
+    if (!field || !message) return;
+    field.classList.add("is-invalid");
+    message.hidden = false;
+    if (errorKey) message.setAttribute("data-i18n", errorKey);
+    var control = field.querySelector("input, select, textarea");
+    if (control) {
+      control.setAttribute("aria-invalid", "true");
+      if (message.id) control.setAttribute("aria-describedby", message.id);
+    }
   }
 
   function bindMenu() {
@@ -356,16 +378,22 @@
     if (form) {
       form.addEventListener("submit", function (e) {
         e.preventDefault();
-        var note = document.querySelector("[data-profile-saved]");
-        if (note) note.hidden = false;
+        var note = form.querySelector("[data-profile-saved]");
+        if (note) {
+          note.hidden = false;
+          note.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
       });
     }
     var personal = document.querySelector("[data-personal-form]");
     if (personal) {
       personal.addEventListener("submit", function (e) {
         e.preventDefault();
-        var note = document.querySelector("[data-personal-saved]");
-        if (note) note.hidden = false;
+        var note = personal.querySelector("[data-personal-saved]");
+        if (note) {
+          note.hidden = false;
+          note.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
       });
     }
   }
@@ -437,6 +465,17 @@
     if (params.get("error") === "1") {
       var err = document.querySelector("[data-error]");
       if (err) err.hidden = false;
+    }
+    if (params.get("error") === "email_taken") {
+      var emailInput = document.getElementById("email");
+      if (emailInput) emailInput.value = "test@example.com";
+      showRegisterFieldError("email", "eat.errors.email_taken");
+    }
+    if (params.get("error") === "password_short") {
+      showRegisterFieldError("password", "eat.errors.password_too_short");
+    }
+    if (params.get("error") === "password_mismatch") {
+      showRegisterFieldError("password_confirm", "eat.errors.password_mismatch");
     }
     if (params.get("sent") === "1") {
       var sent = document.querySelector("[data-sent]");

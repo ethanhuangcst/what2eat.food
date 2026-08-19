@@ -1,0 +1,320 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useLocale, useT } from "@/src/i18n/use-t";
+import {
+  firstRegisterField,
+  mapApiErrorToField,
+  type RegisterField,
+  validateRegisterClient,
+} from "@/src/auth/register-validation";
+import { authJson, AuthApiError } from "@/src/ui/auth-api";
+import { PublicShell } from "@/src/ui/public-shell";
+import { LogoLink } from "@/src/ui/logo-link";
+import { LocaleSwitch } from "@/src/ui/locale-switch";
+import { PasswordField } from "@/src/ui/password-field";
+import { LocationField } from "@/src/ui/location-field";
+import { RegisterPhotoBowl } from "@/src/ui/register-photo-bowl";
+import { usePageTitle } from "@/src/ui/use-page-title";
+import { FieldWrap, fieldDescribedBy } from "@/src/ui/field-wrap";
+import { notifySessionChanged } from "@/src/ui/session-events";
+
+function focusRegisterField(field: RegisterField) {
+  const id = field === "password_confirm" ? "password_confirm" : field;
+  if (field === "photo") {
+    document.querySelector<HTMLElement>('[data-photo-trigger], .register-photo__frame')?.focus();
+    return;
+  }
+  document.getElementById(id)?.focus();
+}
+
+export default function RegisterPageClient() {
+  const t = useT();
+  const locale = useLocale();
+  const router = useRouter();
+  usePageTitle("eat.register.title");
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegisterField, string>>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [location, setLocation] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+  function clearField(field: RegisterField) {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+    setFormError(null);
+  }
+
+  function applyClientErrors(errors: Partial<Record<RegisterField, string>>) {
+    setFieldErrors(errors);
+    setFormError(null);
+    const first = firstRegisterField(errors);
+    if (first) focusRegisterField(first);
+  }
+
+  function applyApiError(err: unknown) {
+    if (err instanceof AuthApiError) {
+      const mapped = mapApiErrorToField(err.key);
+      const field = (err.field as RegisterField | undefined) ?? mapped.field;
+      if (mapped.formLevel || !field) {
+        setFieldErrors({});
+        setFormError(mapped.errorKey);
+        return;
+      }
+      setFieldErrors({ [field]: mapped.errorKey });
+      setFormError(null);
+      focusRegisterField(field);
+      return;
+    }
+    setFieldErrors({});
+    setFormError("eat.errors.network");
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setFieldErrors({});
+    setFormError(null);
+    const fd = new FormData(e.currentTarget);
+    const input = {
+      name: String(fd.get("name") ?? ""),
+      email: String(fd.get("email") ?? ""),
+      age: String(fd.get("age") ?? ""),
+      password: String(fd.get("password") ?? ""),
+      confirmPassword: String(fd.get("password_confirm") ?? ""),
+    };
+    const clientErrors = validateRegisterClient(input);
+    if (Object.keys(clientErrors).length > 0) {
+      applyClientErrors(clientErrors);
+      return;
+    }
+    const loc = String(fd.get("location") ?? "").trim();
+    const body = {
+      name: input.name,
+      email: input.email,
+      gender: fd.get("gender"),
+      age: input.age,
+      defaultLocation: loc || undefined,
+      password: input.password,
+      confirmPassword: input.confirmPassword,
+      locale,
+    };
+    try {
+      await authJson("/api/auth/register", { method: "POST", body: JSON.stringify(body) });
+      let photoError = false;
+      if (photoUrl) {
+        try {
+          await authJson("/api/profile/personal", {
+            method: "PUT",
+            body: JSON.stringify({
+              name: body.name,
+              email: body.email,
+              gender: body.gender,
+              age: body.age ? Number(body.age) : undefined,
+              defaultLocation: loc || "Clerkenwell",
+              photoUrl,
+            }),
+          });
+          notifySessionChanged();
+        } catch {
+          photoError = true;
+        }
+      }
+      router.push(photoError ? "/profile?photo_error=too_large" : "/profile");
+      router.refresh();
+    } catch (err) {
+      applyApiError(err);
+    }
+  }
+
+  return (
+    <PublicShell localeCorner={false}>
+      <div className="register-shell">
+        <header className="register-topbar">
+          <LogoLink href="/" />
+          <LocaleSwitch />
+        </header>
+        <main id="content" className="auth-main auth-main--register">
+          <div className="register-card">
+            <header className="register-card__head">
+              <h1>{t("eat.register.title")}</h1>
+            </header>
+            <form className="register-card__form" onSubmit={onSubmit} data-testid="auth-form-register" noValidate>
+              <div className="register-card__grid">
+                <div className="register-card__fields">
+                  <p className="register-required-note">{t("eat.register.required_note")}</p>
+                  {formError ? (
+                    <p className="error" role="alert" data-testid="auth-form-error">
+                      {t(formError)}
+                    </p>
+                  ) : null}
+                  <FieldWrap
+                    field="name"
+                    errorKey={fieldErrors.name}
+                    label={
+                      <label htmlFor="name" className="is-required">
+                        {t("eat.register.name")}
+                      </label>
+                    }
+                  >
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      autoComplete="name"
+                      required
+                      data-testid="field-name"
+                      aria-invalid={fieldErrors.name ? true : undefined}
+                      aria-describedby={fieldDescribedBy("name", fieldErrors.name)}
+                      onChange={() => clearField("name")}
+                    />
+                  </FieldWrap>
+                  <FieldWrap
+                    field="email"
+                    errorKey={fieldErrors.email}
+                    errorTestId="field-email-error"
+                    label={
+                      <div className="field-label-row">
+                        <label htmlFor="email" className="is-required">
+                          {t("eat.register.email")}
+                        </label>
+                        <span className="field-label-note">{t("eat.register.email_hint")}</span>
+                      </div>
+                    }
+                  >
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      data-testid="field-email"
+                      aria-invalid={fieldErrors.email ? true : undefined}
+                      aria-describedby={fieldDescribedBy("email", fieldErrors.email)}
+                      onChange={() => clearField("email")}
+                    />
+                  </FieldWrap>
+                  <div className="field-row field-row--demographics">
+                    <div className="field field--gender">
+                      <label htmlFor="gender" className="is-required">
+                        {t("eat.register.gender")}
+                      </label>
+                      <select id="gender" name="gender" required defaultValue="skip">
+                        <option value="male">{t("eat.register.gender_male")}</option>
+                        <option value="female">{t("eat.register.gender_female")}</option>
+                        <option value="other">{t("eat.register.gender_other")}</option>
+                        <option value="skip">{t("eat.register.gender_skip")}</option>
+                      </select>
+                    </div>
+                    <FieldWrap
+                      field="age"
+                      className="field--age"
+                      errorKey={fieldErrors.age}
+                      label={
+                        <label htmlFor="age">
+                          {t("eat.register.age")}
+                        </label>
+                      }
+                    >
+                      <input
+                        id="age"
+                        name="age"
+                        type="number"
+                        min={13}
+                        max={120}
+                        aria-invalid={fieldErrors.age ? true : undefined}
+                        aria-describedby={fieldDescribedBy("age", fieldErrors.age)}
+                        onChange={() => clearField("age")}
+                      />
+                    </FieldWrap>
+                  </div>
+                  <div className="field" data-location-field>
+                    <label htmlFor="location">{t("eat.register.location")}</label>
+                    <LocationField value={location} onChange={setLocation} testId="field-location" />
+                  </div>
+                  <FieldWrap
+                    field="password"
+                    errorKey={fieldErrors.password}
+                    errorTestId="field-password-error"
+                    label={
+                      <label htmlFor="password" className="is-required">
+                        {t("eat.register.password")}
+                      </label>
+                    }
+                  >
+                    <PasswordField
+                      id="password"
+                      name="password"
+                      autoComplete="new-password"
+                      required
+                      testId="field-password"
+                      invalid={Boolean(fieldErrors.password)}
+                      describedBy={fieldDescribedBy("password", fieldErrors.password)}
+                      onChange={() => clearField("password")}
+                    />
+                  </FieldWrap>
+                  <FieldWrap
+                    field="password_confirm"
+                    errorKey={fieldErrors.password_confirm}
+                    errorTestId="field-confirm-password-error"
+                    label={
+                      <label htmlFor="password_confirm" className="is-required">
+                        {t("eat.register.password_confirm")}
+                      </label>
+                    }
+                  >
+                    <PasswordField
+                      id="password_confirm"
+                      name="password_confirm"
+                      autoComplete="new-password"
+                      required
+                      testId="field-confirm-password"
+                      invalid={Boolean(fieldErrors.password_confirm)}
+                      describedBy={fieldDescribedBy("password_confirm", fieldErrors.password_confirm)}
+                      onChange={() => clearField("password_confirm")}
+                    />
+                  </FieldWrap>
+                </div>
+                <aside className="register-card__photo" aria-labelledby="photo-label">
+                  <FieldWrap
+                    field="photo"
+                    errorKey={fieldErrors.photo}
+                    errorTestId="field-photo-error"
+                    label={
+                      <p className="register-photo__eyebrow" id="photo-label">
+                        {t("eat.register.photo")}
+                      </p>
+                    }
+                  >
+                    <RegisterPhotoBowl
+                      onPhotoChange={(url) => {
+                        setPhotoUrl(url);
+                        clearField("photo");
+                      }}
+                      onPhotoError={(key) => {
+                        setFieldErrors((prev) => ({ ...prev, photo: key }));
+                        setFormError(null);
+                      }}
+                    />
+                  </FieldWrap>
+                </aside>
+              </div>
+              <div className="register-card__actions">
+                <button className="btn register-card__submit" type="submit" data-testid="register-submit">
+                  {t("eat.register.submit")}
+                </button>
+                <p className="auth-links">
+                  <Link href="/login">{t("eat.register.has_account")}</Link>
+                </p>
+              </div>
+            </form>
+          </div>
+        </main>
+      </div>
+    </PublicShell>
+  );
+}
