@@ -15,6 +15,12 @@ export { placesAgentBaseUrl, placesAgentCallerKey, placesAgentTarget } from "./c
 const DEFAULT_TIMEOUT_MS = 25_000;
 /** Agent vendor adapters can run up to 25s; leave headroom so the BFF does not abort first. */
 const DEFAULT_SEARCH_TIMEOUT_MS = 60_000;
+/**
+ * Chat runs an LLM tool loop (often geocode + search_restaurants). Successful replies
+ * commonly take 10–24s; tool-heavy turns exceed the 25s general timeout and surface as
+ * `errors.chat_failed` (see what2eat Next log: `POST /api/chat 502 in 25.1s`).
+ */
+const DEFAULT_CHAT_TIMEOUT_MS = 90_000;
 
 function timeoutMs(): number {
   const raw = Number(process.env.PLACES_AGENT_TIMEOUT_MS ?? DEFAULT_TIMEOUT_MS);
@@ -28,6 +34,16 @@ function searchTimeoutMs(): number {
     if (Number.isFinite(n) && n > 0) return n;
   }
   return Math.max(timeoutMs(), DEFAULT_SEARCH_TIMEOUT_MS);
+}
+
+/** Exported for unit tests — chat BFF budget independent of short tool calls. */
+export function chatTimeoutMs(): number {
+  const raw = process.env.PLACES_AGENT_CHAT_TIMEOUT_MS;
+  if (raw?.trim()) {
+    const n = Number(raw);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return Math.max(timeoutMs(), DEFAULT_CHAT_TIMEOUT_MS);
 }
 
 let injectedFetch: FetchFn | null = null;
@@ -160,8 +176,19 @@ export type ChatMessage = { role: "user" | "assistant" | "system"; content: stri
 export async function chat(input: {
   messages: ChatMessage[];
   locale: string;
-}): Promise<AgentEnvelope<{ message: { role: string; content: string; key?: string } }>> {
-  return postV1("chat", { messages: input.messages, locale: input.locale });
+}): Promise<
+  AgentEnvelope<{
+    message: { role: string; content: string; key?: string };
+    places?: PlaceCard[];
+    tool_calls?: string[];
+  }>
+> {
+  return postV1(
+    "chat",
+    { messages: input.messages, locale: input.locale },
+    injectedFetch ?? fetch,
+    chatTimeoutMs(),
+  );
 }
 
 export function defaultProviders(): string[] {

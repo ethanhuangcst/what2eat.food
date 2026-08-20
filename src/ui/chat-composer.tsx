@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useT } from "@/src/i18n/use-t";
 import { type ChatBlock, type ChatTurn } from "@/src/chat/types";
 
@@ -107,12 +108,44 @@ type Props = {
   inputTestId: string;
   sendTestId: string;
   disabled?: boolean;
+  /** When true, show pending bubble and keep send disabled. */
+  pending?: boolean;
   onSend: (text: string) => void | Promise<void>;
 };
 
-function Transcript({ turns, className }: { turns: ChatTurn[]; className: string }) {
+function PendingBubble() {
+  const t = useT();
   return (
-    <div className={className} data-transcript>
+    <p className="bubble is-pending" data-testid="chat-pending" role="status" aria-live="polite">
+      <span className="chat-pending__dots" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </span>
+      {t("eat.chat.pending")}
+    </p>
+  );
+}
+
+function Transcript({
+  turns,
+  className,
+  pending,
+}: {
+  turns: ChatTurn[];
+  className: string;
+  pending?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [turns, pending]);
+
+  return (
+    <div ref={ref} className={className} data-transcript>
       {turns.map((turn, i) =>
         turn.role === "user" ? (
           <p key={i} className="bubble is-user" data-testid="chat-user-msg">
@@ -126,6 +159,7 @@ function Transcript({ turns, className }: { turns: ChatTurn[]; className: string
           </p>
         ),
       )}
+      {pending ? <PendingBubble /> : null}
     </div>
   );
 }
@@ -167,6 +201,7 @@ function ComposerForm({
       data-chat-form
       onSubmit={async (e) => {
         e.preventDefault();
+        if (disabled) return;
         const form = e.currentTarget;
         const input = form.elements.namedItem("chat-input") as HTMLInputElement | null;
         const text = input?.value.trim() ?? "";
@@ -202,14 +237,16 @@ export function ChatComposer({
   inputTestId,
   sendTestId,
   disabled,
+  pending,
   onSend,
 }: Props) {
   const sendClassName = "btn";
+  const showPending = Boolean(pending);
 
   if (variant === "place") {
     return (
       <>
-        <Transcript turns={turns} className="transcript place-why-chat__transcript" />
+        <Transcript turns={turns} className="transcript place-why-chat__transcript" pending={showPending} />
         <ComposerForm
           inputId={inputId}
           placeholderKey={placeholderKey}
@@ -217,7 +254,7 @@ export function ChatComposer({
           sendTestId={sendTestId}
           composerClassName="composer place-why-chat__composer"
           sendClassName={sendClassName}
-          disabled={disabled}
+          disabled={disabled || showPending}
           onSend={onSend}
         />
       </>
@@ -226,7 +263,7 @@ export function ChatComposer({
 
   return (
     <div className="chat" data-chat-root>
-      <Transcript turns={turns} className="transcript" />
+      <Transcript turns={turns} className="transcript" pending={showPending} />
       <ComposerForm
         inputId={inputId}
         placeholderKey={placeholderKey}
@@ -234,7 +271,7 @@ export function ChatComposer({
         sendTestId={sendTestId}
         composerClassName="composer"
         sendClassName={sendClassName}
-        disabled={disabled}
+        disabled={disabled || showPending}
         onSend={onSend}
       />
     </div>

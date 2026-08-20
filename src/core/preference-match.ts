@@ -112,6 +112,10 @@ export function matchPick(
     address: card.address,
     rating: card.rating ?? card.tripadvisor?.rating,
     priceLevel: normalizePriceLevel(card.price_level),
+    pricePerPerson:
+      typeof card.price_per_person === "number" && Number.isFinite(card.price_per_person)
+        ? card.price_per_person
+        : undefined,
     photoUrl: card.photos?.[0],
     category: card.category,
     fit,

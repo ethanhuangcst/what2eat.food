@@ -17,8 +17,27 @@ function asObject(v: unknown): Record<string, unknown> | null {
   return typeof v === "object" && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
 }
 
-function parseOneBlock(raw: unknown): ChatBlock | null {
+const BLOCK_KINDS = ["paragraph", "heading", "list", "pick_ref", "link"] as const;
+
+/**
+ * Normalize one agent block: either `{type, ...fields}` or nested `{paragraph:{text}}`
+ * (LLMs often emit the nested shape from "paragraph{text}" prose in the system prompt).
+ */
+function normalizeBlockObject(raw: unknown): Record<string, unknown> | null {
   const o = asObject(raw);
+  if (!o) return null;
+  if (typeof o.type === "string") return o;
+  for (const kind of BLOCK_KINDS) {
+    if (kind in o) {
+      const nested = asObject(o[kind]);
+      if (nested) return { type: kind, ...nested };
+    }
+  }
+  return null;
+}
+
+function parseOneBlock(raw: unknown): ChatBlock | null {
+  const o = normalizeBlockObject(raw);
   if (!o || typeof o.type !== "string") return null;
   switch (o.type) {
     case "paragraph":
@@ -168,4 +187,46 @@ export function picksFromListContext(
     sources: p.sources,
     mapUrl: p.mapUrl,
   }));
+}
+
+/** Map places-agent tool cards into hydrate refs (chat-03). */
+export function picksFromAgentPlaces(
+  places: {
+    name: string;
+    provider: string;
+    rating?: number;
+    category?: string;
+    photos?: string[];
+    sources: PlaceSource[];
+  }[],
+): ListChatPickRef[] {
+  const out: ListChatPickRef[] = [];
+  for (const card of places) {
+    const nativeId = card.sources[0]?.native_id;
+    if (!nativeId) continue;
+    const mapUrl = pickMapUrl(card.sources);
+    const photo = card.photos?.[0];
+    out.push({
+      name: card.name,
+      nativeId,
+      provider: card.provider,
+      photoUrl: photo && HTTPS.test(photo) ? photo : undefined,
+      rating: card.rating,
+      category: card.category,
+      sources: card.sources,
+      mapUrl: mapUrl && isSafeHttpsUrl(mapUrl) ? mapUrl : undefined,
+    });
+  }
+  return out;
+}
+
+/** Context picks win; agent tool places fill gaps. */
+export function mergeHydratePicks(
+  contextPicks: ListChatPickRef[],
+  agentPlaces: ListChatPickRef[],
+): ListChatPickRef[] {
+  const byKey = new Map<string, ListChatPickRef>();
+  for (const p of agentPlaces) byKey.set(`${p.provider}:${p.nativeId}`, p);
+  for (const p of contextPicks) byKey.set(`${p.provider}:${p.nativeId}`, p);
+  return [...byKey.values()];
 }

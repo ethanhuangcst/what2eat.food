@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import {
   CHAT_PANEL_MIN_H,
   CHAT_PANEL_MIN_W,
+  CHAT_PANEL_SIZE_KEY,
+  defaultChatPanelSize,
+  loadChatPanelSize,
   nextChatPanelSize,
+  saveChatPanelSize,
 } from "@/src/chat/panel-size";
 
 describe("nextChatPanelSize", () => {
@@ -47,7 +51,53 @@ describe("nextChatPanelSize", () => {
       viewportW: 500,
       viewportH: 600,
     });
-    expect(next.width).toBe(468); // 500 - 32
-    expect(next.height).toBe(568); // 600 - 32
+    expect(next.width).toBe(468);
+    expect(next.height).toBe(568);
+  });
+});
+
+describe("chat panel size persistence", () => {
+  beforeEach(() => {
+    // node env: provide a minimal localStorage
+    const store = new Map<string, string>();
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => {
+          store.set(k, v);
+        },
+        removeItem: (k: string) => {
+          store.delete(k);
+        },
+      },
+    });
+  });
+
+  it("should_roundtrip_save_and_load", () => {
+    saveChatPanelSize({ width: 400, height: 500 });
+    expect(loadChatPanelSize()).toEqual({ width: 400, height: 500 });
+  });
+
+  it("should_keep_defaultChatPanelSize_independent_of_localStorage", () => {
+    saveChatPanelSize({ width: 400, height: 500 });
+    expect(defaultChatPanelSize()).toEqual({
+      width: CHAT_PANEL_MIN_W,
+      height: CHAT_PANEL_MIN_H,
+    });
+    expect(loadChatPanelSize()).toEqual({ width: 400, height: 500 });
+  });
+
+  it("should_clamp_invalid_stored_size_to_minimum", () => {
+    localStorage.setItem(CHAT_PANEL_SIZE_KEY, JSON.stringify({ width: 10, height: 10 }));
+    const loaded = loadChatPanelSize();
+    expect(loaded.width).toBe(CHAT_PANEL_MIN_W);
+    expect(loaded.height).toBe(CHAT_PANEL_MIN_H);
+  });
+
+  it("should_return_defaults_when_missing_or_corrupt", () => {
+    expect(loadChatPanelSize()).toEqual({ width: CHAT_PANEL_MIN_W, height: CHAT_PANEL_MIN_H });
+    localStorage.setItem(CHAT_PANEL_SIZE_KEY, "not-json");
+    expect(loadChatPanelSize()).toEqual({ width: CHAT_PANEL_MIN_W, height: CHAT_PANEL_MIN_H });
   });
 });

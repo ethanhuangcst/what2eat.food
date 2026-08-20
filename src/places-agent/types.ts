@@ -29,6 +29,7 @@ export type PlaceCard = {
   phone?: string;
   photos?: string[];
   price_level?: PriceLevel;
+  price_per_person?: number;
   sources: PlaceSource[];
   tripadvisor?: {
     rating?: number;
@@ -63,6 +64,7 @@ export type PickDto = {
   address?: string;
   rating?: number;
   priceLevel?: PriceLevel;
+  pricePerPerson?: number;
   photoUrl?: string;
   category?: string;
   fit: FitLevel;

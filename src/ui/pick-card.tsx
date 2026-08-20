@@ -66,6 +66,16 @@ export function PickCard({ pick, onDetails, onUnsave, onOpenMap, showMap = true,
         ) : null}
         <div className="pick-card__facts">
           {pick.address ? <p className="pick-card__address">{pick.address}</p> : null}
+          <p className="pick-card__price" data-testid="pick-price">
+            {pick.priceLevel
+              ? t("eat.card.price", { band: pick.priceLevel })
+              : t("eat.card.price_unavailable")}
+          </p>
+          {pick.pricePerPerson != null ? (
+            <p className="pick-card__price-pp meta">
+              {t("eat.card.price_per_person", { amount: String(pick.pricePerPerson) })}
+            </p>
+          ) : null}
         </div>
         <div className="pick-card__match">
           <span className={fitBadgeClass(pick.fit)} data-testid="pick-fit">

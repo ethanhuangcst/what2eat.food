@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hydrateChatBlocks, isSafeHttpsUrl, parseAgentBlocks } from "@/src/chat/blocks";
+import { hydrateChatBlocks, isSafeHttpsUrl, mergeHydratePicks, parseAgentBlocks, picksFromAgentPlaces } from "@/src/chat/blocks";
 
 describe("parseAgentBlocks", () => {
   it("should_parse_json_blocks_when_agent_returns_structured_json", () => {
@@ -15,6 +15,37 @@ describe("parseAgentBlocks", () => {
     expect(blocks[0]).toEqual({ type: "paragraph", text: "Try these:" });
     expect(blocks[1]).toMatchObject({ type: "pick_ref", nativeId: "ChIJ-a" });
     expect(fallbackText).toBe("Try St. JOHN");
+  });
+
+  it("should_parse_nested_keyed_blocks_when_llm_omits_type_field", () => {
+    const raw = JSON.stringify({
+      blocks: [
+        { heading: { level: 2, text: "Recommended steakhouse picks in Central" } },
+        { paragraph: { text: "For a business meal:" } },
+        { list: { items: ["Carne's", "REX"] } },
+        {
+          pick_ref: {
+            provider: "GOOGLE_MAPS",
+            nativeId: "ChIJ09FPywUBBDQRKufFrOJWuFE",
+            note: "Carne's Argentinian Steak House",
+          },
+        },
+      ],
+      fallbackText: "Start with Carne's.",
+    });
+    const { blocks, fallbackText } = parseAgentBlocks(raw);
+    expect(blocks).toEqual([
+      { type: "heading", level: 2, text: "Recommended steakhouse picks in Central" },
+      { type: "paragraph", text: "For a business meal:" },
+      { type: "list", items: ["Carne's", "REX"] },
+      {
+        type: "pick_ref",
+        provider: "GOOGLE_MAPS",
+        nativeId: "ChIJ09FPywUBBDQRKufFrOJWuFE",
+        note: "Carne's Argentinian Steak House",
+      },
+    ]);
+    expect(fallbackText).toBe("Start with Carne's.");
   });
 
   it("should_parse_fenced_json_when_wrapped_in_markdown_fence", () => {
@@ -86,6 +117,70 @@ describe("hydrateChatBlocks", () => {
     );
     expect(blocks[0]).toMatchObject({ type: "pick_ref", name: "St. JOHN" });
     expect((blocks[0] as { photoUrl?: string }).photoUrl).toBeUndefined();
+  });
+});
+
+describe("picksFromAgentPlaces", () => {
+  it("should_map_tool_cards_for_hydrate", () => {
+    const refs = picksFromAgentPlaces([
+      {
+        name: "吴记鲜",
+        provider: "AMAP",
+        rating: 4.2,
+        category: "fast_food_restaurant",
+        photos: ["https://cdn.example/a.jpg"],
+        sources: [
+          {
+            provider: "AMAP",
+            native_id: "B0xxx",
+            deeplinks: { amap_web: "https://uri.amap.com/marker?position=1,2" },
+          },
+        ],
+      },
+    ]);
+    expect(refs[0]).toMatchObject({
+      name: "吴记鲜",
+      provider: "AMAP",
+      nativeId: "B0xxx",
+      photoUrl: "https://cdn.example/a.jpg",
+      mapUrl: "https://uri.amap.com/marker?position=1,2",
+    });
+  });
+
+  it("should_prefer_context_over_agent_when_merging", () => {
+    const merged = mergeHydratePicks(
+      [{ name: "From context", provider: "AMAP", nativeId: "B1", rating: 5 }],
+      [{ name: "From agent", provider: "AMAP", nativeId: "B1", rating: 3 }],
+    );
+    expect(merged).toHaveLength(1);
+    expect(merged[0]?.name).toBe("From context");
+  });
+
+  it("should_hydrate_pick_ref_from_agent_places_when_not_in_list_context", () => {
+    const agent = picksFromAgentPlaces([
+      {
+        name: "吴记鲜定位",
+        provider: "AMAP",
+        photos: ["https://cdn.example/w.jpg"],
+        sources: [
+          {
+            provider: "AMAP",
+            native_id: "amap-1",
+            deeplinks: { amap_web: "https://uri.amap.com/marker?position=121,31" },
+          },
+        ],
+      },
+    ]);
+    const blocks = hydrateChatBlocks(
+      [{ type: "pick_ref", provider: "AMAP", nativeId: "amap-1", note: "快餐" }],
+      mergeHydratePicks([], agent),
+    );
+    expect(blocks[0]).toMatchObject({
+      type: "pick_ref",
+      name: "吴记鲜定位",
+      photoUrl: "https://cdn.example/w.jpg",
+      mapUrl: "https://uri.amap.com/marker?position=121,31",
+    });
   });
 });
 

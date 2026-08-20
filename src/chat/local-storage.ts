@@ -2,13 +2,17 @@ import { type ChatTurn } from "./types";
 
 export const CHAT_PREFIX = "w2e.chat.";
 
+/** Stable list-chat transcript for this browser until logout (not per searchId). */
+export const LIST_CHAT_STORAGE_KEY = `${CHAT_PREFIX}list`;
+
 function storage(): Storage | null {
   if (typeof globalThis === "undefined") return null;
   return globalThis.localStorage ?? null;
 }
 
-export function listChatKey(searchId: string): string {
-  return `${CHAT_PREFIX}list.${searchId}`;
+/** One Decide list-chat transcript per browser; survives re-search / new searchId. */
+export function listChatKey(): string {
+  return LIST_CHAT_STORAGE_KEY;
 }
 
 export function placeChatKey(provider: string, nativeId: string): string {
@@ -50,6 +54,41 @@ export function appendTurn(key: string, turn: ChatTurn): ChatTurn[] {
   const next = [...readTranscript(key), normalizeTurn(turn)];
   writeTranscript(key, next);
   return next;
+}
+
+/**
+ * One-time migrate from MVP-3 keys `w2e.chat.list.{searchId}` into the stable list key.
+ * Picks the longest legacy transcript; removes all legacy list keys.
+ */
+export function migrateLegacyListChatIfNeeded(): void {
+  const store = storage();
+  if (!store) return;
+  const stable = listChatKey();
+  if (readTranscript(stable).length > 0) {
+    removeLegacyListKeys(store, stable);
+    return;
+  }
+  const legacyKeys: string[] = [];
+  for (let i = 0; i < store.length; i++) {
+    const k = store.key(i);
+    if (k && k.startsWith(`${CHAT_PREFIX}list.`) && k !== stable) legacyKeys.push(k);
+  }
+  let best: ChatTurn[] = [];
+  for (const k of legacyKeys) {
+    const turns = readTranscript(k);
+    if (turns.length > best.length) best = turns;
+  }
+  if (best.length > 0) writeTranscript(stable, best);
+  removeLegacyListKeys(store, stable);
+}
+
+function removeLegacyListKeys(store: Storage, stable: string): void {
+  const toRemove: string[] = [];
+  for (let i = 0; i < store.length; i++) {
+    const k = store.key(i);
+    if (k && k.startsWith(`${CHAT_PREFIX}list.`) && k !== stable) toRemove.push(k);
+  }
+  toRemove.forEach((k) => store.removeItem(k));
 }
 
 export function clearAllChatStorage(): void {

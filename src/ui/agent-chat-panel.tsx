@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@/src/i18n/use-t";
 import { authJson } from "@/src/ui/auth-api";
-import { appendTurn, listChatKey, readTranscript, turnPlainContent } from "@/src/chat/local-storage";
+import { appendTurn, listChatKey, migrateLegacyListChatIfNeeded, readTranscript, turnPlainContent } from "@/src/chat/local-storage";
 import {
-  CHAT_PANEL_MIN_H,
-  CHAT_PANEL_MIN_W,
+  defaultChatPanelSize,
+  loadChatPanelSize,
   nextChatPanelSize,
+  saveChatPanelSize,
 } from "@/src/chat/panel-size";
 import { type ChatTurn, type ListChatContext } from "@/src/chat/types";
 import { ChatComposer } from "@/src/ui/chat-composer";
@@ -23,20 +24,22 @@ export function AgentChatPanel({ open, onOpen, onClose, context }: Props) {
   const t = useT();
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [busy, setBusy] = useState(false);
-  const [size, setSize] = useState({ width: CHAT_PANEL_MIN_W, height: CHAT_PANEL_MIN_H });
+  const [size, setSize] = useState(defaultChatPanelSize);
   const dragRef = useRef<{
     startX: number;
     startY: number;
     startW: number;
     startH: number;
   } | null>(null);
-  const storageKey = context.searchId ? listChatKey(context.searchId) : null;
+  const storageKey = listChatKey();
+  const canSend = Boolean(context.searchId) && !busy;
 
   useEffect(() => {
-    if (!storageKey) {
-      setTurns([]);
-      return;
-    }
+    setSize(loadChatPanelSize());
+  }, []);
+
+  useEffect(() => {
+    migrateLegacyListChatIfNeeded();
     setTurns(readTranscript(storageKey));
   }, [storageKey, open]);
 
@@ -53,20 +56,25 @@ export function AgentChatPanel({ open, onOpen, onClose, context }: Props) {
     function onMove(e: PointerEvent) {
       const drag = dragRef.current;
       if (!drag) return;
-      setSize(
-        nextChatPanelSize({
-          startWidth: drag.startW,
-          startHeight: drag.startH,
-          startClientX: drag.startX,
-          startClientY: drag.startY,
-          clientX: e.clientX,
-          clientY: e.clientY,
-          viewportW: window.innerWidth,
-          viewportH: window.innerHeight,
-        }),
-      );
+      const next = nextChatPanelSize({
+        startWidth: drag.startW,
+        startHeight: drag.startH,
+        startClientX: drag.startX,
+        startClientY: drag.startY,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        viewportW: window.innerWidth,
+        viewportH: window.innerHeight,
+      });
+      setSize(next);
     }
     function onUp() {
+      if (dragRef.current) {
+        setSize((s) => {
+          saveChatPanelSize(s);
+          return s;
+        });
+      }
       dragRef.current = null;
     }
     window.addEventListener("pointermove", onMove);
@@ -90,7 +98,7 @@ export function AgentChatPanel({ open, onOpen, onClose, context }: Props) {
 
   const send = useCallback(
     async (text: string) => {
-      if (!storageKey) return;
+      if (!context.searchId) return;
       const userTurn: ChatTurn = { role: "user", content: text };
       const withUser = appendTurn(storageKey, userTurn);
       setTurns(withUser);
@@ -177,7 +185,8 @@ export function AgentChatPanel({ open, onOpen, onClose, context }: Props) {
                 placeholderKey="eat.decide.chat_placeholder"
                 inputTestId="agent-chat-input"
                 sendTestId="agent-chat-send"
-                disabled={busy || !storageKey}
+                disabled={!canSend}
+                pending={busy}
                 onSend={send}
               />
             ) : null}

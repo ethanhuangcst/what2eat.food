@@ -4,6 +4,7 @@ import {
   appendTurn,
   clearAllChatStorage,
   listChatKey,
+  migrateLegacyListChatIfNeeded,
   placeChatKey,
   readTranscript,
   writeTranscript,
@@ -36,8 +37,31 @@ describe("chat localStorage", () => {
     Object.keys(store).forEach((k) => delete store[k]);
   });
 
+  it("should_use_stable_list_key_across_searches", () => {
+    expect(listChatKey()).toBe(`${CHAT_PREFIX}list`);
+    expect(listChatKey()).toBe(listChatKey());
+  });
+
+  it("should_keep_list_transcript_when_search_id_would_have_changed", () => {
+    const key = listChatKey();
+    appendTurn(key, { role: "user", content: "中環附近有名的牛扒" });
+    appendTurn(key, { role: "assistant", content: "Try Carne's" });
+    // Re-search would mint a new searchId; stable key must still return the transcript.
+    expect(readTranscript(listChatKey())).toHaveLength(2);
+    expect(readTranscript(listChatKey())[0]?.content).toBe("中環附近有名的牛扒");
+  });
+
+  it("should_migrate_legacy_per_search_list_key_into_stable_key", () => {
+    const legacy = `${CHAT_PREFIX}list.search-old`;
+    writeTranscript(legacy, [{ role: "user", content: "legacy msg" }]);
+    expect(readTranscript(listChatKey())).toEqual([]);
+    migrateLegacyListChatIfNeeded();
+    expect(readTranscript(listChatKey())[0]?.content).toBe("legacy msg");
+    expect(store[legacy]).toBeUndefined();
+  });
+
   it("should_append_and_read_list_transcript", () => {
-    const key = listChatKey("search-1");
+    const key = listChatKey();
     appendTurn(key, { role: "user", content: "hello" });
     const turns = readTranscript(key);
     expect(turns).toHaveLength(1);
@@ -45,7 +69,7 @@ describe("chat localStorage", () => {
   });
 
   it("should_keep_place_and_list_transcripts_separate", () => {
-    const listKey = listChatKey("search-1");
+    const listKey = listChatKey();
     const placeKey = placeChatKey("GOOGLE_MAPS", "ChIJ-a");
     writeTranscript(listKey, [{ role: "user", content: "list msg" }]);
     writeTranscript(placeKey, [{ role: "user", content: "place msg" }]);
@@ -54,20 +78,20 @@ describe("chat localStorage", () => {
   });
 
   it("should_return_empty_for_invalid_json", () => {
-    const key = listChatKey("bad");
+    const key = listChatKey();
     store[key] = "not-json";
     expect(readTranscript(key)).toEqual([]);
   });
 
   it("should_clear_all_w2e_chat_keys", () => {
-    writeTranscript(listChatKey("a"), [{ role: "user", content: "x" }]);
+    writeTranscript(listChatKey(), [{ role: "user", content: "x" }]);
     writeTranscript(placeChatKey("GOOGLE_MAPS", "b"), [{ role: "user", content: "y" }]);
     clearAllChatStorage();
     expect(Object.keys(store).some((k) => k.startsWith(CHAT_PREFIX))).toBe(false);
   });
 
   it("should_roundtrip_assistant_blocks_in_transcript", () => {
-    const key = listChatKey("rich");
+    const key = listChatKey();
     appendTurn(key, {
       role: "assistant",
       content: "Try St. JOHN",

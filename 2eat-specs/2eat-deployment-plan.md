@@ -133,7 +133,9 @@ Pull：**Recreate + Pull**（仅 Update 可能不拉新 `latest`）。
 
 | 名称 | 说明 |
 | --- | --- |
-| `PLACES_AGENT_TIMEOUT_MS` | 默认 25000 |
+| `PLACES_AGENT_TIMEOUT_MS` | 默认 25000（短工具：geocode / details） |
+| `PLACES_AGENT_SEARCH_TIMEOUT_MS` | 默认 ≥60000（search_restaurants） |
+| `PLACES_AGENT_CHAT_TIMEOUT_MS` | 默认 ≥90000（`/v1/chat` 工具循环；过短会出现「暂时无法连线 agent」） |
 | `W2E_DEFAULT_PROVIDERS` | JSON，如 `["GOOGLE_MAPS"]` |
 | `W2E_ENRICH_TRIPADVISOR` | `true` / `false` |
 | `TEST_DATABASE_URL` | 本地/CI 隔离库 |

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MVP-4 live journey: Decide sort + reshuffle re-query."""
+"""MVP-4 live journey: sort, reshuffle, chat UX, price, location draft."""
 
 import re
 from playwright.sync_api import sync_playwright
@@ -8,6 +8,7 @@ BASE = "http://localhost:3020"
 EMAIL = "mvp4.live@what2eat.food"
 PASSWORD = "testpass123"
 LOCATION = "Clerkenwell, London"
+DRAFT_LOCATION = "Shoreditch, London"
 
 
 def ensure_user(page):
@@ -75,6 +76,11 @@ def test_mvp4_live():
         sign_in(page)
         run_decide_search(page)
 
+        # decide-09: every card exposes pick-price (band or unavailable)
+        price_nodes = page.locator('[data-testid="pick-price"]')
+        assert price_nodes.count() >= 1, "pick-price must render on cards"
+        assert price_nodes.count() == page.locator('[data-testid="pick-card"]').count()
+
         sort = page.locator('[data-testid="decide-sort"]')
         assert sort.count() == 1, "Sort control must be visible"
         assert sort.input_value() == "rank", "Default sort must be rank"
@@ -112,18 +118,42 @@ def test_mvp4_live():
         ]
         assert any(second_ids), "Reshuffle must return live pick cards"
 
+        # decide-10: location draft survives locale switch
+        page.fill('[data-testid="decide-location"]', DRAFT_LOCATION)
+        page.click('[data-testid="locale-CN"]')
+        page.wait_for_timeout(800)
+        page.wait_for_selector('[data-testid="decide-location"]', timeout=15000)
+        assert page.input_value('[data-testid="decide-location"]') == DRAFT_LOCATION, (
+            "Location draft must survive locale switch"
+        )
+        page.click('[data-testid="locale-EN"]')
+        page.wait_for_timeout(800)
+
         # chat-02: list chat opens with NW resize grip + sticky composer
         page.click('[data-testid="agent-chat-open"]')
         page.wait_for_selector('[data-testid="agent-chat-resize"]', timeout=10000)
         page.wait_for_selector('[data-testid="agent-chat-input"]', timeout=10000)
         page.wait_for_selector('[data-testid="agent-chat-send"]', timeout=10000)
-        box = page.locator('[data-agent-chat]').bounding_box()
+        box = page.locator("[data-agent-chat]").bounding_box()
         assert box is not None and box["width"] >= 350 and box["height"] >= 400
 
-        # chat-03: send a message; rich or legacy reply must render agent message
+        # chat-05: resize then persist via localStorage key
+        grip = page.locator('[data-testid="agent-chat-resize"]')
+        gbox = grip.bounding_box()
+        assert gbox is not None
+        page.mouse.move(gbox["x"] + gbox["width"] / 2, gbox["y"] + gbox["height"] / 2)
+        page.mouse.down()
+        page.mouse.move(gbox["x"] - 80, gbox["y"] - 60)
+        page.mouse.up()
+        stored = page.evaluate("() => localStorage.getItem('w2e.chat.panelSize')")
+        assert stored and "width" in stored, "Panel size must persist to localStorage"
+
+        # chat-04: pending while waiting; chat-03: agent reply
         page.fill('[data-testid="agent-chat-input"]', "Which of these is quieter for a group?")
         page.click('[data-testid="agent-chat-send"]')
+        page.wait_for_selector('[data-testid="chat-pending"]', timeout=5000)
         page.wait_for_selector('[data-testid="chat-agent-msg"]', timeout=90000)
+        assert page.locator('[data-testid="chat-pending"]').count() == 0
 
         browser.close()
 

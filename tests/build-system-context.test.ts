@@ -15,6 +15,7 @@ describe("build-system-context", () => {
     expect(text).toContain("suggestion");
     expect(text).toContain("pick_ref");
     expect(text).toContain("JSON");
+    expect(text).toContain('"type":"paragraph"');
   });
 
   it("should_include_place_facts", () => {
@@ -30,9 +31,10 @@ describe("build-system-context", () => {
     expect(text).toContain("GOOGLE_MAPS:ChIJ-a");
   });
 
-  it("should_use_defaults_when_list_context_sparse", () => {
+  it("should_require_card_first_pick_ref_guidance", () => {
     const text = buildListSystemContext({});
-    expect(text).toContain("unknown");
-    expect(text).toContain("none yet");
+    expect(text).toContain("Card-first");
+    expect(text).toContain("MUST be a pick_ref");
+    expect(text).toMatch(/1–2 short|1-2 short/);
   });
 });

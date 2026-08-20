@@ -156,7 +156,7 @@ Mutating 路由：session + CSRF。Caller key 仅服务端 env。
 
 **Reshuffle：** 同条件重新 `search_restaurants`；忽略当前 sort，重置为 `rank`；更新 `updatedAt`。
 
-**Chat：** BFF 组装 list/place context → agent → 客户端 append 到 `w2e.chat.list.{searchId}` / `w2e.chat.place.{source}:{nativeId}`；登出清除 `w2e.chat.*`。Assistant 回复以 **ChatBlock[]** 渲染（§3.6）；list 面板可拖拽 resize（§3.5）。
+**Chat：** BFF 组装 list/place context → agent → 客户端 append 到 `w2e.chat.list`（稳定键，跨重新搜索保留）/ `w2e.chat.place.{source}:{nativeId}`；登出清除 `w2e.chat.*`。Assistant 回复以 **ChatBlock[]** 渲染（§3.6）；list 面板可拖拽 resize（§3.5）。
 
 ### 2.5 数据模型（App DB）
 

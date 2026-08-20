@@ -79,4 +79,15 @@ describe("preference-match", () => {
     expect(picks[0].provider).toBe("AMAP");
     expect(picks[1].provider).toBe("GOOGLE_MAPS");
   });
+
+  it("should_map_price_level_and_price_per_person", () => {
+    const priced: PlaceCard = {
+      ...card,
+      price_level: "$$",
+      price_per_person: 80,
+    };
+    const picks = rankPicks([priced], { likes: [], dislikes: [], constraints: [] }, {});
+    expect(picks[0].priceLevel).toBe("$$");
+    expect(picks[0].pricePerPerson).toBe(80);
+  });
 });

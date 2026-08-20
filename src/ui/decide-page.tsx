@@ -27,6 +27,12 @@ import {
   mealContextSelectionFromInput,
   parseMealContext,
 } from "@/src/core/meal-contexts";
+import {
+  decideFormSsrDefaults,
+  mayApplyProfileDefault,
+  readDecideDraft,
+  writeDecideDraft,
+} from "@/src/core/decide-draft";
 
 const SORT_I18N: Record<DecideSortMode, string> = {
   rank: "eat.decide.sort.rank",
@@ -69,10 +75,12 @@ export default function DecidePageClient() {
   const t = useT();
   const locale = useLocale();
   const searchParams = useSearchParams();
-  const [location, setLocation] = useState("Clerkenwell, London");
+  // SSR-safe defaults only — drafts applied after mount (see draft hydrate effect).
+  const ssrDefaults = decideFormSsrDefaults();
+  const [location, setLocation] = useState(ssrDefaults.location);
   const [mealSelection, setMealSelection] = useState<MealContextSelection>(defaultMealContextSelection);
-  const [budget, setBudget] = useState("$$");
-  const [craving, setCraving] = useState("");
+  const [budget, setBudget] = useState(ssrDefaults.budget);
+  const [craving, setCraving] = useState(ssrDefaults.craving);
   const [result, setResult] = useState<SearchResult | null>(null);
   const [page, setPage] = useState(1);
   const [errorKey, setErrorKey] = useState<string | null>(null);
@@ -83,6 +91,9 @@ export default function DecidePageClient() {
     null,
   );
   const [locationTouched, setLocationTouched] = useState(false);
+  const [mealTouched, setMealTouched] = useState(false);
+  const [budgetTouched, setBudgetTouched] = useState(false);
+  const [cravingTouched, setCravingTouched] = useState(false);
 
   const mealOptions = useMemo(
     () => MEAL_CONTEXT_OPTIONS.map((key) => ({ key, label: t(key) })),
@@ -91,6 +102,39 @@ export default function DecidePageClient() {
   const mealContextDisplay = formatMealContextDisplay(mealSelection, locale);
   const mealContextStorage = formatMealContextStorage(mealSelection);
   const mealContextForChat = mealContextDisplay;
+
+  // Apply session drafts after mount so first paint matches SSR (ADR-029).
+  useEffect(() => {
+    if (!searchParams.get("location")) {
+      const d = readDecideDraft("location");
+      if (d != null) {
+        setLocation(d);
+        setLocationTouched(true);
+      }
+    }
+    if (!searchParams.get("meal")) {
+      const d = readDecideDraft("meal");
+      if (d != null) {
+        setMealSelection(parseMealContext(d));
+        setMealTouched(true);
+      }
+    }
+    if (!searchParams.get("budget")) {
+      const d = readDecideDraft("budget");
+      if (d != null) {
+        setBudget(d);
+        setBudgetTouched(true);
+      }
+    }
+    if (searchParams.get("craving") == null) {
+      const d = readDecideDraft("craving");
+      if (d != null) {
+        setCraving(d);
+        setCravingTouched(true);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only draft hydrate
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -111,16 +155,44 @@ export default function DecidePageClient() {
       if (cancelled) return;
 
       const criteria = data.criteria;
-      if (criteria && !searchParams.get("location") && criteria.location) {
+      if (
+        criteria?.location &&
+        mayApplyProfileDefault({
+          urlValue: searchParams.get("location"),
+          draftValue: readDecideDraft("location"),
+          touched: locationTouched,
+        })
+      ) {
         setLocation(criteria.location);
       }
-      if (criteria && !searchParams.get("meal") && criteria.mealContext) {
+      if (
+        criteria?.mealContext &&
+        mayApplyProfileDefault({
+          urlValue: searchParams.get("meal"),
+          draftValue: readDecideDraft("meal"),
+          touched: mealTouched,
+        })
+      ) {
         setMealSelection(parseMealContext(criteria.mealContext));
       }
-      if (criteria && !searchParams.get("budget") && criteria.budget) {
+      if (
+        criteria?.budget &&
+        mayApplyProfileDefault({
+          urlValue: searchParams.get("budget"),
+          draftValue: readDecideDraft("budget"),
+          touched: budgetTouched,
+        })
+      ) {
         setBudget(criteria.budget);
       }
-      if (criteria?.craving !== undefined && !searchParams.get("craving")) {
+      if (
+        criteria?.craving !== undefined &&
+        mayApplyProfileDefault({
+          urlValue: searchParams.get("craving"),
+          draftValue: readDecideDraft("craving"),
+          touched: cravingTouched,
+        })
+      ) {
         setCraving(criteria.craving);
       }
       if (
@@ -151,9 +223,23 @@ export default function DecidePageClient() {
     const loc = searchParams.get("location");
     const meal = searchParams.get("meal");
     const bud = searchParams.get("budget");
-    if (loc) setLocation(loc);
-    if (meal) setMealSelection(parseMealContext(meal));
-    if (bud) setBudget(bud);
+    const crav = searchParams.get("craving");
+    if (loc) {
+      setLocation(loc);
+      writeDecideDraft("location", loc);
+    }
+    if (meal) {
+      setMealSelection(parseMealContext(meal));
+      writeDecideDraft("meal", meal);
+    }
+    if (bud) {
+      setBudget(bud);
+      writeDecideDraft("budget", bud);
+    }
+    if (crav != null) {
+      setCraving(crav);
+      writeDecideDraft("craving", crav);
+    }
     if (searchParams.get("open") === "chat") setChatOpen(true);
   }, [searchParams]);
 
@@ -162,18 +248,27 @@ export default function DecidePageClient() {
       "/api/profile/personal",
     )
       .then((p) => {
-        if (p.defaultLocation && !searchParams.get("location")) {
+        if (p.defaultLat != null && p.defaultLng != null && p.defaultLocation) {
+          setProfilePin({
+            location: p.defaultLocation,
+            lat: p.defaultLat,
+            lng: p.defaultLng,
+          });
+        }
+        if (
+          p.defaultLocation &&
+          mayApplyProfileDefault({
+            urlValue: searchParams.get("location"),
+            draftValue: readDecideDraft("location"),
+            touched: locationTouched,
+          })
+        ) {
           setLocation(p.defaultLocation);
-          if (p.defaultLat != null && p.defaultLng != null) {
-            setProfilePin({
-              location: p.defaultLocation,
-              lat: p.defaultLat,
-              lng: p.defaultLng,
-            });
-          }
         }
       })
       .catch(() => undefined);
+    // Mount + searchParams URL presence only; do not re-apply profile when user edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid overwrite on locale refresh
   }, [searchParams]);
 
   async function search(nextPage = 1) {
@@ -354,8 +449,10 @@ export default function DecidePageClient() {
                 id="location"
                 value={location}
                 onChange={(e) => {
-                  setLocation(e.target.value);
+                  const v = e.target.value;
+                  setLocation(v);
                   setLocationTouched(true);
+                  writeDecideDraft("location", v);
                 }}
                 disabled={searching}
                 data-testid="decide-location"
@@ -368,9 +465,12 @@ export default function DecidePageClient() {
                 list="meal-contexts"
                 autoComplete="off"
                 value={mealContextDisplay}
-                onChange={(e) =>
-                  setMealSelection(mealContextSelectionFromInput(e.target.value, locale))
-                }
+                onChange={(e) => {
+                  const next = mealContextSelectionFromInput(e.target.value, locale);
+                  setMealSelection(next);
+                  setMealTouched(true);
+                  writeDecideDraft("meal", formatMealContextStorage(next));
+                }}
                 placeholder={t("eat.decide.meal_context_ph")}
                 disabled={searching}
                 data-testid="decide-meal-context"
@@ -386,7 +486,12 @@ export default function DecidePageClient() {
               <select
                 id="budget"
                 value={budget}
-                onChange={(e) => setBudget(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setBudget(v);
+                  setBudgetTouched(true);
+                  writeDecideDraft("budget", v);
+                }}
                 disabled={searching}
                 data-testid="decide-budget"
               >
@@ -400,9 +505,15 @@ export default function DecidePageClient() {
               <input
                 id="craving"
                 value={craving}
-                onChange={(e) => setCraving(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCraving(v);
+                  setCravingTouched(true);
+                  writeDecideDraft("craving", v);
+                }}
                 placeholder={t("eat.decide.craving_ph")}
                 disabled={searching}
+                data-testid="decide-craving"
               />
             </div>
             <div className="field decide-form__submit">

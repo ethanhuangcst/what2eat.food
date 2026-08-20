@@ -4,9 +4,15 @@ import { authError, requireUser } from "@/src/auth/user";
 import { csrfOk } from "@/src/auth/csrf";
 import { normalizeLocale } from "@/src/core/locales";
 import { buildListSystemContext, buildPlaceSystemContext } from "@/src/chat/build-system-context";
-import { hydrateChatBlocks, parseAgentBlocks } from "@/src/chat/blocks";
+import {
+  hydrateChatBlocks,
+  mergeHydratePicks,
+  parseAgentBlocks,
+  picksFromAgentPlaces,
+} from "@/src/chat/blocks";
 import { chat } from "@/src/places-agent/client";
 import { type ListChatPickRef } from "@/src/chat/types";
+import { type PlaceCard } from "@/src/places-agent/types";
 
 const messageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -102,7 +108,11 @@ export async function POST(request: NextRequest) {
 
   const msg = envelope.data.message;
   const { blocks: parsedBlocks, fallbackText } = parseAgentBlocks(msg.content);
-  const picks = hydratePicksForScope(parsed.data.scope, parsed.data.context);
+  const contextPicks = hydratePicksForScope(parsed.data.scope, parsed.data.context);
+  const agentPicks = picksFromAgentPlaces(
+    (envelope.data.places ?? []) as PlaceCard[],
+  );
+  const picks = mergeHydratePicks(contextPicks, agentPicks);
   const blocks = hydrateChatBlocks(parsedBlocks, picks);
 
   return NextResponse.json({

@@ -43,7 +43,7 @@
 | **MVP-1** | Onboarding product: shell, home, account, profile | **1–13** | Visitor registers → saves profile → signs out/in → profile persists; locale EN→HK | **Complete** |
 | **MVP-2** | Decide with real places: search, cards, details, save | **14–19, 21–22, 24–26** | 已登录用户 runs Decide on a real pin → real vendor cards → details + why → save → Saved → unsave | **Complete** |
 | **MVP-3** | Agent chat + history (chat history browser-local only) | **20, 23, 27** | 列表 chat + place chat with real agent replies → transcripts survive refresh → cleared on logout → History | **Complete**（2026-08-20 签收） |
-| **MVP-4** | Polish Decide + chat UX（**产品收尾切片**） | **28–35** (+ **decide-03** behavior update) | Sort; reshuffle 重查; list chat resize/rich/pending; place chat scroll; price on cards; criteria draft across locale; persist chat panel size | To-do |
+| **MVP-4** | Polish Decide + chat UX（**产品收尾切片**） | **28–35** (+ **decide-03** behavior update) | Sort; reshuffle 重查; list chat resize/rich/pending; place chat scroll; price on cards; criteria draft across locale; persist chat panel size | **Complete**（pending user confirm） |
 
 **构建顺序：** MVP-1 → MVP-2 → MVP-3 → MVP-4（each slice to DoD before the next）。one user story to DoD at a time within each slice. **MVP-4 为 what2eat 当前计划内最后一切片**（Dismiss / cool-off 仍明确不在范围）。
 
@@ -92,14 +92,14 @@ Feature 按 **MVP** 排序 以便MVP-1 items stay grouped.
 | 25 | Saved | `saved-01` | Saved places list | Saved pick cards; Details; empty state | [§25 saved-01](#25-saved-saved-01--saved-places-list) | **MVP-2** | Done |
 | 26 | Saved | `saved-02` | Unsave | Remove a place from saved list or details | [§26 saved-02](#26-saved-saved-02--unsave) | **MVP-2** | Done |
 | 27 | History | `history-01` | Decision history | Recent places you went to, meal context, re-run Decide; empty state | [§27 history-01](#27-history-history-01--decision-history) | **MVP-3** | Done |
-| 28 | Decide | `decide-08` | Results sort | Re-order the short list by rank, rating, distance, or price level | [§28 decide-08](#28-decide-decide-08--results-sort) | **MVP-4** | To-do |
-| 29 | Chat | `chat-02` | Resizable chat panel | List chat panel: sticky composer, no dead space; drag resize with current size as minimum | [§29 chat-02](#29-chat-chat-02--resizable-chat-panel) | **MVP-4** | To-do |
-| 30 | Chat | `chat-03` | Rich agent replies | Structured assistant messages with pick cards, photos, and external map links (new tab) | [§30 chat-03](#30-chat-chat-03--rich-agent-replies) | **MVP-4** | To-do |
-| 31 | Chat | `chat-04` | Pending + place chat scroll | Waiting indicator while agent replies; place chat transcript scrolls inside a fixed chat box | [§31 chat-04](#31-chat-chat-04--pending--place-chat-scroll) | **MVP-4** | To-do |
-| 32 | Decide | `decide-09` | Show price on cards | Display agent `price_level` (and optional `price_per_person`) on pick cards and place details — honest missing when absent | [§32 decide-09](#32-decide-decide-09--show-price-on-cards) | **MVP-4** | To-do |
-| 33 | Decide | `decide-10` | Keep location draft | Area/pin input keeps the latest typed value across locale switches; profile default fills only once when virgin | [§33 decide-10](#33-decide-decide-10--keep-location-draft) | **MVP-4** | To-do |
-| 34 | Decide | `decide-11` | Keep other criteria drafts | Meal context, budget, craving keep latest input across locale switches (same draft rules as location) | [§34 decide-11](#34-decide-decide-11--keep-other-criteria-drafts) | **MVP-4** | To-do |
-| 35 | Chat | `chat-05` | Persist chat panel size | Remember list chat width/height in localStorage across refresh (min still default floor) | [§35 chat-05](#35-chat-chat-05--persist-chat-panel-size) | **MVP-4** | To-do |
+| 28 | Decide | `decide-08` | Results sort | Re-order the short list by rank, rating, distance, or price level | [§28 decide-08](#28-decide-decide-08--results-sort) | **MVP-4** | Done |
+| 29 | Chat | `chat-02` | Resizable chat panel | List chat panel: sticky composer, no dead space; drag resize with current size as minimum | [§29 chat-02](#29-chat-chat-02--resizable-chat-panel) | **MVP-4** | Done |
+| 30 | Chat | `chat-03` | Rich agent replies | Structured assistant messages with pick cards, photos, and external map links (new tab) | [§30 chat-03](#30-chat-chat-03--rich-agent-replies) | **MVP-4** | Done |
+| 31 | Chat | `chat-04` | Pending + place chat scroll | Waiting indicator while agent replies; place chat transcript scrolls inside a fixed chat box | [§31 chat-04](#31-chat-chat-04--pending--place-chat-scroll) | **MVP-4** | Done |
+| 32 | Decide | `decide-09` | Show price on cards | Display agent `price_level` (and optional `price_per_person`) on pick cards and place details — honest missing when absent | [§32 decide-09](#32-decide-decide-09--show-price-on-cards) | **MVP-4** | Done |
+| 33 | Decide | `decide-10` | Keep location draft | Area/pin input keeps the latest typed value across locale switches; profile default fills only once when virgin | [§33 decide-10](#33-decide-decide-10--keep-location-draft) | **MVP-4** | Done |
+| 34 | Decide | `decide-11` | Keep other criteria drafts | Meal context, budget, craving keep latest input across locale switches (same draft rules as location) | [§34 decide-11](#34-decide-decide-11--keep-other-criteria-drafts) | **MVP-4** | Done |
+| 35 | Chat | `chat-05` | Persist chat panel size | Remember list chat width/height in localStorage across refresh (min still default floor) | [§35 chat-05](#35-chat-chat-05--persist-chat-panel-size) | **MVP-4** | Done |
 
 Backlog 为 **features 1–35**（MVP-4 = **28–35** + decide-03 行为更新）。Dismiss / cool-off **永久不在范围**。
 
@@ -401,9 +401,10 @@ Backlog 为 **features 1–35**（MVP-4 = **28–35** + decide-03 行为更新�
 
 作为user, 我希望my list chat history kept in this browser 以便I can read earlier messages without storing them in my account database.
 
-- **AC1:** 给定 I sent messages in list chat, 当 I close and reopen the chat panel on the same browser, 则 prior messages for this Decide context are shown from browser-local storage.
+- **AC1:** 给定 I sent messages in list chat, 当 I close and reopen the chat panel on the same browser, 则 prior messages for this Decide context are shown from browser-local storage (`w2e.chat.list`).
 - **AC2:** 给定 I sent messages in list chat, 当 I sign in on another device or browser, 则 those transcripts are not available (no server-side chat history).
 - **AC3:** 给定 I log out on this browser, 当 I sign in again, 则 list chat transcripts from the prior session are cleared from browser-local storage.
+- **AC4:** 给定 I sent messages in list chat for the current Decide session, 当 I run Find restaurants again (new `searchId`), 则 the list chat transcript remains visible and is still stored under `w2e.chat.list` (agent context updates to the new short list; history is not wiped).
 
 **用户故事 3 — Chat is not the only search path**
 
@@ -626,9 +627,10 @@ As an operator, 我希望place-scoped chat orchestration to stay stateless on th
 
 作为诚实性约束, 我希望卡片上的图片、评分、链接来自 BFF 已知的 pick / place 数据，而非模型臆造 URL。
 
-- **AC1:** 给定模型返回 `pick_ref` block（provider + nativeId）, 当 BFF 响应, 则 BFF 从当前 SearchCache picks 或 place snapshot **hydrate** 名称、photoUrl、rating、mapUrl。
-- **AC2:** 给定模型引用不在 context 内的餐厅, 当无法 hydrate, 则降级为纯文本行（无假图、无假链接）。
+- **AC1:** 给定模型返回 `pick_ref` block（provider + nativeId）, 当 BFF 响应, 则 BFF 从当前 SearchCache picks、place snapshot、或 agent 本轮工具返回的 `places[]` **hydrate** 名称、photoUrl、rating、mapUrl。
+- **AC2:** 给定模型引用不在 context 且不在本轮 `places[]` 内的餐厅, 当无法 hydrate, 则降级为纯文本行（无假图、无假链接）。
 - **AC3:** 给定 `POST /api/chat`, 当成功, 则响应体为 `{ reply: { role, blocks[], fallbackText? } }`；客户端向后兼容：若仅收到 legacy `content` 字符串，则渲染为单段 paragraph block。
+- **AC4:** 给定助手介绍餐厅, 当渲染, 则优先 **pick card**（短 lead + cards），避免长段地址/坐标/分类枚举纯文本（card-first prompt）。
 
 **用户故事 4 — Security**
 

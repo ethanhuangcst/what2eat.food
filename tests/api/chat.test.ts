@@ -137,6 +137,67 @@ describe("POST /api/chat", () => {
     expect(res.status).toBe(400);
   });
 
+  it("should_hydrate_pick_ref_from_agent_tool_places_when_not_in_context", async () => {
+    teardown = installAgentMock({
+      ...defaultSearchHandlers(),
+      chat: () => ({
+        ok: true,
+        data: {
+          message: {
+            role: "assistant",
+            content: JSON.stringify({
+              blocks: [
+                { type: "paragraph", text: "这家店偏快餐。" },
+                { type: "pick_ref", provider: "AMAP", nativeId: "amap-wuji", note: "快餐" },
+              ],
+              fallbackText: "吴记鲜",
+            }),
+          },
+          places: [
+            {
+              provider: "AMAP",
+              name: "吴记鲜定位",
+              rating: 4.5,
+              photos: ["https://cdn.example/wuji.jpg"],
+              location: { lat: 31.2, lng: 121.5, crs: "GCJ-02" },
+              sources: [
+                {
+                  provider: "AMAP",
+                  native_id: "amap-wuji",
+                  deeplinks: { amap_web: "https://uri.amap.com/marker?position=121,31" },
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    });
+    await registerTestUser();
+    await loginTestUser();
+    const res = await invokeRoute(
+      chatRoute,
+      authedRequest("/api/chat", {
+        method: "POST",
+        body: {
+          scope: "list",
+          messages: [{ role: "user", content: "给我这家餐厅的信息" }],
+          context: { location: "上海", picks: [] },
+        },
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = await readJson<{
+      reply: { blocks: { type: string; name?: string; photoUrl?: string; mapUrl?: string }[] };
+    }>(res);
+    const pick = body.reply.blocks.find((b) => b.type === "pick_ref");
+    expect(pick).toMatchObject({
+      type: "pick_ref",
+      name: "吴记鲜定位",
+      photoUrl: "https://cdn.example/wuji.jpg",
+      mapUrl: "https://uri.amap.com/marker?position=121,31",
+    });
+  });
+
   it("should_return_502_when_agent_chat_fails", async () => {
     teardown = installAgentMock({
       ...defaultSearchHandlers(),

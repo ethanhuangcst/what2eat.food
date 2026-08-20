@@ -130,6 +130,31 @@ export function PlaceDetailsDialog({
                     {place.hours ?? t("eat.card.hours_unavailable")}
                   </dd>
                 </div>
+                <div className="place-facts-compact__row">
+                  <dt>{t("eat.details.price")}</dt>
+                  <dd
+                    className={
+                      pick.priceLevel || place.price_level ? undefined : "is-missing"
+                    }
+                    data-testid="details-price"
+                  >
+                    <span>
+                      {pick.priceLevel || place.price_level
+                        ? t("eat.card.price", {
+                            band: pick.priceLevel ?? place.price_level ?? "",
+                          })
+                        : t("eat.card.price_unavailable")}
+                    </span>
+                    {pick.pricePerPerson != null || place.price_per_person != null ? (
+                      <span className="meta">
+                        {" "}
+                        {t("eat.card.price_per_person", {
+                          amount: String(pick.pricePerPerson ?? place.price_per_person),
+                        })}
+                      </span>
+                    ) : null}
+                  </dd>
+                </div>
               </dl>
               {updatedAt ? (
                 <p className="place-split__updated meta-mono">

@@ -64,6 +64,7 @@ export function PlaceChatBlock({ context }: Props) {
         inputTestId="place-chat-input"
         sendTestId="place-chat-send"
         disabled={busy}
+        pending={busy}
         onSend={send}
       />
     </div>

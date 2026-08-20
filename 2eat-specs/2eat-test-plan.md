@@ -103,15 +103,15 @@ MVP-1 不调 agent，但仍需真实 DB、真实 session、真实邮件路径（
 | 用户 | 明确可用性确认 — **confirmed** |
 | Retrospective | [`what2eat-mvp3-lessons.md`](../../workspace-specs/knowledge/web-app-development/what2eat-mvp3-lessons.md)；ADR-027 / ADR-028 |
 
-### MVP-4 — 排序、chat UX、价格、条件草稿、尺寸持久化
+### MVP-4 — 排序、chat UX、价格、条件草稿、尺寸持久化 — **Complete**（pending user confirm）
 
 | 门禁 | 要求 |
 | --- | --- |
 | 功能 | sort；reshuffle 重查；list chat napkin-corner resize + rich + pending；place chat 内滚动；`price_level`；Decide 条件草稿跨 locale（decide-10/11）；chat 尺寸 localStorage（chat-05） |
-| 测试 | `make test` + **`make test-e2e-mvp4-live`** |
+| 测试 | `make test`（149）+ **`make test-e2e-mvp4-live`** — **passed** 2026-08-20 |
 | 质量 | 价格仅来自 agent；无则 honest missing；chat 卡片图/链仅 BFF hydrate；profile 默认不覆盖已编辑条件 |
-| 用户 | 明确可用性确认 |
-| Retrospective | 附探针；覆盖率；pending / locale-draft / panel-size 证据 |
+| 用户 | 明确可用性确认 — **pending** |
+| Retrospective | [`what2eat-mvp4-lessons.md`](../../workspace-specs/knowledge/web-app-development/what2eat-mvp4-lessons.md)；ADR-029（drafts）；无新 ADR |
 
 ---
 
@@ -143,7 +143,7 @@ MVP-1 不调 agent，但仍需真实 DB、真实 session、真实邮件路径（
 | **MVP-1** auth/profile/shell | `tests/api/auth-*.test.ts`, `profile-*.test.ts`, `locale.test.ts`, `i18n.test.ts`, `register-validation.test.ts`, `csrf.test.ts` | `e2e/test_mvp1.py`, `test_login_failed.py`, `test_reset_set_password.py`, `test_register_errors.py` | `make test`, `make test-e2e-mvp1` |
 | **MVP-2** decide/details/saved | `decide-search`, `decide-reshuffle`, `places-details`, `preference-match`, `partial-banner`, `saved.test.ts`, `nearby-alternatives`, `location`, `geocode-reverse` | `e2e/test_mvp2_live.py` | `make test-e2e-mvp2-live` |
 | **MVP-3** chat/history | `chat.test.ts`, `history.test.ts`, `decide-current.test.ts`, `chat-local-storage.test.ts`, `meal-contexts.test.ts` | `e2e/test_mvp3_live.py` | `make test-e2e-mvp3-live` |
-| **MVP-4** sort/reshuffle/chat UX | `decide-sort.test.ts`, `sort-picks.test.ts`, chat blocks/hydrate unit | `e2e/test_mvp4_live.py` | `make test-e2e-mvp4-live` |
+| **MVP-4** sort/reshuffle/chat UX | `decide-sort.test.ts`, `sort-picks.test.ts`, `decide-draft.test.ts`, `chat-panel-size.test.ts`, `chat-composer-pending.test.tsx`, chat blocks/hydrate unit | `e2e/test_mvp4_live.py` | `make test-e2e-mvp4-live` |
 
 **支撑模块（跨 MVP）：** `chip-selection`, `session-token`, `mail-outbox`, `places-agent-config`, `public-url`, `build-system-context`, `locales`.
 
@@ -212,14 +212,14 @@ MVP-1 不调 agent，但仍需真实 DB、真实 session、真实邮件路径（
 | Place chat | `POST /v1/chat` | 注入 | 同上 | MVP-3 | 2026-08-20 Clerkenwell |
 | Reload hydrate (`/api/decide/current`) | App DB (`SearchCache`) | `decide-current.test.ts` | 同上（reload 步骤） | MVP-3 | 2026-08-20 |
 | History | App DB | Vitest + E2E | live 旅程 | MVP-3 | 2026-08-20 Clerkenwell |
-| Sort + reshuffle | search + cache | unit + `/api/decide/sort` | `test-e2e-mvp4-live` | MVP-4 | — |
-| Chat resize (`chat-02`) | 组件 + Playwright | composer 贴底；`agent-chat-resize`；min 22.5×28rem | `test-e2e-mvp4-live` | MVP-4 | — |
-| Rich chat (`chat-03`) | 组件 + BFF + Playwright | `blocks[]` hydrate pick card；`target="_blank"`；legacy `content` 降级 | `test-e2e-mvp4-live` | MVP-4 | — |
-| Pending + place scroll (`chat-04`) | 组件 + Playwright | `chat-pending` 在 busy 时出现；place transcript 溢出可滚；composer 可见 | `test-e2e-mvp4-live` | MVP-4 | — |
-| Price display (`decide-09`) | 组件 + live | 有 `price_level` 显示 band；无则 unavailable；详情事实行 | `test-e2e-mvp4-live` | MVP-4 | agent 字段 live 2026-08-20（见 price-level-live）；UI 展示仍待 |
-| Location draft (`decide-10`) | 组件 + Playwright | 改地区后切 locale，`decide-location` 值不变；profile 默认不覆盖 touched | `test-e2e-mvp4-live` | MVP-4 | — |
-| Criteria drafts (`decide-11`) | 组件 + Playwright | 改 meal/budget/craving 后切 locale，值不变 | `test-e2e-mvp4-live` | MVP-4 | — |
-| Persist panel size (`chat-05`) | 组件 + Playwright | resize 后 reload，面板尺寸恢复 | `test-e2e-mvp4-live` | MVP-4 | — |
+| Sort + reshuffle | search + cache | unit + `/api/decide/sort` | `test-e2e-mvp4-live` | MVP-4 | 2026-08-20 |
+| Chat resize (`chat-02`) | 组件 + Playwright | composer 贴底；`agent-chat-resize`；min 22.5×28rem | `test-e2e-mvp4-live` | MVP-4 | 2026-08-20 |
+| Rich chat (`chat-03`) | 组件 + BFF + Playwright | `blocks[]` hydrate pick card；`target="_blank"`；legacy `content` 降级 | `test-e2e-mvp4-live` | MVP-4 | 2026-08-20 |
+| Pending + place scroll (`chat-04`) | 组件 + Playwright | `chat-pending` 在 busy 时出现；place transcript 溢出可滚；composer 可见 | `test-e2e-mvp4-live` | MVP-4 | 2026-08-20 |
+| Price display (`decide-09`) | 组件 + live | 有 `price_level` 显示 band；无则 unavailable；详情事实行 | `test-e2e-mvp4-live` | MVP-4 | 2026-08-20（UI + agent；见 price-level-live） |
+| Location draft (`decide-10`) | 组件 + Playwright | 改地区后切 locale，`decide-location` 值不变；profile 默认不覆盖 touched | `test-e2e-mvp4-live` | MVP-4 | 2026-08-20 |
+| Criteria drafts (`decide-11`) | 组件 + Playwright | 改 meal/budget/craving 后切 locale，值不变 | `test-e2e-mvp4-live` | MVP-4 | 2026-08-20 |
+| Persist panel size (`chat-05`) | 组件 + Playwright | resize 后 reload，面板尺寸恢复 | `test-e2e-mvp4-live` | MVP-4 | 2026-08-20 |
 
 Agent 层 live 探针细节见 [`../../1.places-agent/agent-specs/4.test-strategy.md`](../../1.places-agent/agent-specs/4.test-strategy.md) 与 [`8.user-test-cases.md`](../../1.places-agent/agent-specs/8.user-test-cases.md) — 此处不重复 TC 明细。
 
