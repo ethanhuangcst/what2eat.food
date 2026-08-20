@@ -74,7 +74,10 @@
             <label for="craving" data-i18n="eat.decide.craving">I'm craving… (optional)</label>
             <input id="craving" name="craving" data-i18n="eat.decide.craving_ph" data-i18n-attr="placeholder" placeholder="e.g. soup noodles, not too spicy" />
           </div>
-          <button class="btn" type="submit" data-i18n="eat.decide.submit" data-testid="decide-submit">Find restaurants</button>
+          <div class="field decide-form__submit">
+            <span class="decide-form__submit-spacer" aria-hidden="true"></span>
+            <button class="btn" type="submit" data-i18n="eat.decide.submit" data-testid="decide-submit">Find restaurants</button>
+          </div>
         </form>
       </section>
 
@@ -93,7 +96,7 @@
               class="btn-reshuffle"
               href="06-decide.html?page=2"
               data-i18n-title="eat.decide.reshuffle_hint"
-              title="Keeps your filters and shows the next picks from the same ranked list."
+              title="Keeps your filters and fetches a fresh ranked list from map vendors."
             >
               <svg class="btn-reshuffle__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M4 7h9.5a3.5 3.5 0 0 1 0 7H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
@@ -104,6 +107,17 @@
             </a>
           </div>
           <p class="meta decide-results__summary" data-results-summary data-i18n="eat.decide.results_summary" data-i18n-vars='{"shown":"1","end":"4","total":"8"}'>Showing 1–4 of 8</p>
+          <div class="decide-results__sort-row">
+            <label class="decide-sort" for="decide-sort">
+              <span class="decide-sort__label" data-i18n="eat.decide.sort_label">Sort by</span>
+              <select id="decide-sort" class="decide-sort__select" data-testid="decide-sort" data-i18n="eat.a11y.sort" data-i18n-attr="aria-label" aria-label="Sort results">
+                <option value="rank" data-i18n="eat.decide.sort.rank">By rank (default)</option>
+                <option value="rating" data-i18n="eat.decide.sort.rating">By rating</option>
+                <option value="distance" data-i18n="eat.decide.sort.distance">By distance</option>
+                <option value="price" data-i18n="eat.decide.sort.price">By price</option>
+              </select>
+            </label>
+          </div>
         </div>
 
         <div class="alert-banner is-info" data-partial hidden role="status" data-i18n="eat.decide.partial_banner">GOOGLE_MAPS did not return in time. Showing AMAP results only.</div>
@@ -137,6 +151,7 @@
               </div>
               <div class="pick-card__status">
               <p class="pick-card__distance meta" data-i18n="eat.card.bff_distance" data-i18n-vars='{"minutes":"8"}'>8 min walk (from your pin)</p>
+              <p class="pick-card__price" data-testid="pick-price" data-i18n="eat.card.price" data-i18n-vars='{"band":"$$"}'>Price band $$</p>
               </div>
               <div class="pick-card__actions">
               <button type="button" class="pick-card__link" data-open-dialog="dialog-details" data-i18n="eat.card.open_details">Details</button>
@@ -374,25 +389,65 @@
       data-i18n-attr="aria-label"
     >
       <div class="agent-chat__panel">
+        <div
+          class="agent-chat__resize"
+          data-agent-chat-resize
+          data-testid="agent-chat-resize"
+          role="separator"
+          aria-orientation="both"
+          tabindex="0"
+          data-i18n="eat.a11y.chat_resize"
+          data-i18n-attr="aria-label"
+        >
+          <span class="agent-chat__resize-mark" aria-hidden="true"></span>
+        </div>
         <header class="agent-chat__head">
           <div>
             <h2 data-i18n="eat.decide.chat_title">Chat with agent</h2>
             <p
               class="meta agent-chat__context"
               data-i18n="eat.decide.chat_context"
-              data-i18n-vars='{"area":"Clerkenwell","meal":"Weekend dinner","budget":"$$"}'
+              data-i18n-vars='{"area":"Bank of China Tower, Hong Kong","meal":"Colleagues dinner","budget":"$$"}'
             >
-              Clerkenwell · Weekend dinner · $$
+              Bank of China Tower, Hong Kong · Colleagues dinner · $$
             </p>
           </div>
           <button type="button" class="btn btn-quiet" data-agent-chat-close data-i18n="eat.common.close" data-testid="agent-chat-close">Close</button>
         </header>
-        <div class="agent-chat__body chat" data-chat-root data-chat-reply-key="eat.decide.chat_sample_agent">
+        <div class="agent-chat__body chat" data-chat-root data-chat-rich="1">
           <div class="transcript" data-transcript>
             <p class="bubble is-user" data-i18n="eat.decide.chat_sample_user">Can we drop Indian and keep it under 15 min walk?</p>
-            <p class="bubble">
-              <span class="kind" data-i18n="eat.why.kind_model">Suggestion</span><br />
-              <span data-i18n="eat.decide.chat_sample_agent">Keeping your $$ band and weekend dinner context. Dishoom is out; St. JOHN and Bao still fit. Say reshuffle if you want the next picks.</span>
+            <article class="bubble bubble--rich chat-rich" data-testid="chat-agent-msg">
+              <p class="chat-rich__label kind" data-i18n="eat.why.kind_model">Suggestion</p>
+              <p class="chat-rich__lead" data-i18n="eat.decide.chat_rich_lead">
+                Keeping your $$ band and colleagues dinner context — three quieter Japanese options still on this list:
+              </p>
+              <ul class="chat-rich__cards">
+                <li class="chat-pick-card" data-testid="chat-pick-card">
+                  <a class="chat-pick-card__media" href="https://www.google.com/maps/search/?api=1&amp;query=Ichijuissai+Hong+Kong" target="_blank" rel="noopener noreferrer">
+                    <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd1871?w=160&amp;h=120&amp;fit=crop" alt="" width="80" height="60" loading="lazy" />
+                  </a>
+                  <div class="chat-pick-card__body">
+                    <h3 class="chat-pick-card__name">Ichijuissai</h3>
+                    <p class="chat-pick-card__meta" data-i18n="eat.decide.chat_rich_pick_1">4.0 · Japanese · set meals, easy for groups</p>
+                    <a class="chat-pick-card__link" href="https://www.google.com/maps/search/?api=1&amp;query=Ichijuissai+Hong+Kong" target="_blank" rel="noopener noreferrer" data-i18n="eat.chat.open_maps">Open in Maps</a>
+                  </div>
+                </li>
+                <li class="chat-pick-card" data-testid="chat-pick-card">
+                  <a class="chat-pick-card__media" href="https://www.google.com/maps/search/?api=1&amp;query=Yakiniku+Kagura+Hong+Kong" target="_blank" rel="noopener noreferrer">
+                    <img src="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=160&amp;h=120&amp;fit=crop" alt="" width="80" height="60" loading="lazy" />
+                  </a>
+                  <div class="chat-pick-card__body">
+                    <h3 class="chat-pick-card__name">Yakiniku Kagura</h3>
+                    <p class="chat-pick-card__meta" data-i18n="eat.decide.chat_rich_pick_2">4.2 · Yakiniku · livelier, still within walk band</p>
+                    <a class="chat-pick-card__link" href="https://www.google.com/maps/search/?api=1&amp;query=Yakiniku+Kagura+Hong+Kong" target="_blank" rel="noopener noreferrer" data-i18n="eat.chat.open_maps">Open in Maps</a>
+                  </div>
+                </li>
+              </ul>
+            </article>
+            <p class="bubble is-pending" data-testid="chat-pending" data-list-pending-demo hidden>
+              <span class="chat-pending__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+              <span data-i18n="eat.chat.pending">Agent is replying…</span>
             </p>
           </div>
           <form class="composer" data-chat-form>
@@ -451,6 +506,10 @@
                   <dt data-i18n="eat.details.hours">Hours</dt>
                   <dd class="is-missing" data-i18n="eat.card.hours_unavailable">Hours not returned on search</dd>
                 </div>
+                <div class="place-facts-compact__row">
+                  <dt data-i18n="eat.details.price">Price</dt>
+                  <dd data-testid="place-price" data-i18n="eat.card.price" data-i18n-vars='{"band":"$$"}'>Price band $$</dd>
+                </div>
               </dl>
               <p class="place-split__updated meta-mono" data-i18n="eat.details.updated" data-i18n-vars='{"time":"16:40"}'>Place facts last updated 16:40</p>
             </div>
@@ -483,13 +542,30 @@
               <p class="place-why-note" data-i18n="eat.details.why_note">Confirm dishes and allergens with the restaurant — we do not have the menu here.</p>
             </div>
 
-            <div class="place-why-chat chat" data-chat-root>
+            <div class="place-why-chat chat" data-chat-root data-chat-rich="1">
               <h4 class="place-why-chat__label" data-i18n="eat.details.chat_title">Ask places-agent about this place</h4>
               <div class="transcript place-why-chat__transcript" data-transcript>
                 <p class="bubble is-user" data-i18n="eat.chat.sample_user">Anything lighter nearby if we finish late?</p>
-                <p class="bubble">
-                  <span class="kind" data-i18n="eat.why.kind_model">Suggestion</span><br />
-                  <span data-i18n="eat.chat.sample_agent">Keeping St. JOHN selected: a quieter place two streets north is still likely open. I can reshuffle for late-night if you want.</span>
+                <article class="bubble bubble--rich chat-rich chat-rich--compact" data-testid="chat-agent-msg">
+                  <p class="chat-rich__label kind" data-i18n="eat.why.kind_model">Suggestion</p>
+                  <p class="chat-rich__lead" data-i18n="eat.chat.sample_rich_lead">Still centred on St. JOHN — one quieter option two streets north:</p>
+                  <ul class="chat-rich__cards">
+                    <li class="chat-pick-card" data-testid="chat-pick-card">
+                      <a class="chat-pick-card__media" href="https://www.google.com/maps/search/?api=1&amp;query=Brat+Shoreditch" target="_blank" rel="noopener noreferrer">
+                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=160&amp;h=120&amp;fit=crop" alt="" width="80" height="60" loading="lazy" />
+                      </a>
+                      <div class="chat-pick-card__body">
+                        <h3 class="chat-pick-card__name">Brat</h3>
+                        <p class="chat-pick-card__meta" data-i18n="eat.chat.sample_rich_pick">4.5 · British · likely open late</p>
+                        <a class="chat-pick-card__link" href="https://www.google.com/maps/search/?api=1&amp;query=Brat+Shoreditch" target="_blank" rel="noopener noreferrer" data-i18n="eat.chat.open_maps">Open in Maps</a>
+                      </div>
+                    </li>
+                  </ul>
+                </article>
+                <p class="bubble is-user" data-i18n="eat.chat.sample_price_q">What is the average spend?</p>
+                <p class="bubble is-pending" data-testid="chat-pending" data-pending-demo hidden>
+                  <span class="chat-pending__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                  <span data-i18n="eat.chat.pending">Agent is replying…</span>
                 </p>
               </div>
               <form class="composer place-why-chat__composer" data-chat-form>

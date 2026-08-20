@@ -1,22 +1,15 @@
 "use client";
 
 import { create } from "zustand";
-import { type Locale, isLocale } from "../core/locales";
+import { type Locale } from "../core/locales";
 
 type LocaleState = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
 };
 
-function readInitialLocale(): Locale {
-  if (typeof document === "undefined") return "EN";
-  const match = document.cookie.match(/what2eat_locale=([^;]+)/);
-  const value = match?.[1];
-  return value && isLocale(value) ? value : "EN";
-}
-
 export const useLocaleStore = create<LocaleState>((set) => ({
-  locale: readInitialLocale(),
+  locale: "EN",
   setLocale: (locale) => set({ locale }),
 }));
 

@@ -38,6 +38,8 @@ export default function RegisterPageClient() {
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegisterField, string>>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [location, setLocation] = useState("");
+  const [locationLat, setLocationLat] = useState<number | null>(null);
+  const [locationLng, setLocationLng] = useState<number | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   function clearField(field: RegisterField) {
@@ -99,6 +101,8 @@ export default function RegisterPageClient() {
       gender: fd.get("gender"),
       age: input.age,
       defaultLocation: loc || undefined,
+      defaultLat: locationLat ?? undefined,
+      defaultLng: locationLng ?? undefined,
       password: input.password,
       confirmPassword: input.confirmPassword,
       locale,
@@ -234,7 +238,15 @@ export default function RegisterPageClient() {
                   </div>
                   <div className="field" data-location-field>
                     <label htmlFor="location">{t("eat.register.location")}</label>
-                    <LocationField value={location} onChange={setLocation} testId="field-location" />
+                    <LocationField
+                      value={location}
+                      onChange={setLocation}
+                      onResolved={(_label, lat, lng) => {
+                        setLocationLat(lat);
+                        setLocationLng(lng);
+                      }}
+                      testId="field-location"
+                    />
                   </div>
                   <FieldWrap
                     field="password"

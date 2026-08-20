@@ -62,6 +62,9 @@ export default function SavedPageClient() {
       <main id="content" className="app-main" data-testid="saved-page">
         <div className="toolbar">
           <h1>{t("eat.saved.title")}</h1>
+          <Link href="/history" data-testid="nav-history">
+            {t("eat.nav.history")}
+          </Link>
         </div>
 
         {places.length === 0 ? (

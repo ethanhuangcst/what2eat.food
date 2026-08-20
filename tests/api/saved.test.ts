@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GET as savedGetRoute, POST as savedPostRoute, DELETE as savedDeleteRoute } from "../../app/api/saved/route";
+import { GET as historyGetRoute } from "../../app/api/history/route";
 import { authedRequest, loginTestUser, registerTestUser } from "../helpers/test-user";
 import { bffRequest, readJson, invokeRoute } from "../helpers/http-bff";
 
@@ -55,6 +56,31 @@ describe("/api/saved", () => {
     const emptyRes = await invokeRoute(savedGetRoute, authedRequest("/api/saved"));
     const empty = await readJson<{ places: unknown[] }>(emptyRes);
     expect(empty.places).toHaveLength(0);
+  });
+
+  it("should_record_history_when_saving_a_place", async () => {
+    await authedSession();
+
+    await invokeRoute(
+      savedPostRoute,
+      authedRequest("/api/saved", {
+        method: "POST",
+        body: {
+          provider: "GOOGLE_MAPS",
+          nativeId: "ChIJ-place-a",
+          snapshot: SNAPSHOT,
+          area: "Clerkenwell, London",
+          mealContext: "dinner",
+        },
+      }),
+    );
+
+    const historyRes = await invokeRoute(historyGetRoute, authedRequest("/api/history"));
+    expect(historyRes.status).toBe(200);
+    const history = await readJson<{ decisions: { outcome: string; area: string | null }[] }>(historyRes);
+    expect(history.decisions.length).toBeGreaterThan(0);
+    expect(history.decisions[0]?.outcome).toBe("went");
+    expect(history.decisions[0]?.area).toBe("Clerkenwell, London");
   });
 
   it("should_reject_unauthenticated_saved_list", async () => {

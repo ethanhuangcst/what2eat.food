@@ -4,15 +4,16 @@ import { z } from "zod";
 import { prisma } from "@/src/db/client";
 import { authError, requireUser } from "@/src/auth/user";
 import { normalizeLocale } from "@/src/core/locales";
-import { geocode, providersForPin, searchRestaurants } from "@/src/places-agent/client";
-import { rankPicks } from "@/src/core/preference-match";
-import { paginatePicks, type SearchCachePayload } from "@/src/core/short-list";
+import { fetchDecideCards, sliceDecidePicks } from "@/src/core/decide-run";
+import { type SearchCachePayload } from "@/src/core/short-list";
 
 const searchSchema = z.object({
   location: z.string().min(1),
   mealContext: z.string().optional(),
   budget: z.string().optional(),
   craving: z.string().optional(),
+  lat: z.number().min(-90).max(90).optional(),
+  lng: z.number().min(-180).max(180).optional(),
   page: z.coerce.number().int().min(1).default(1),
 });
 
@@ -34,54 +35,40 @@ export async function POST(request: NextRequest) {
   const parsed = searchSchema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) return authError("errors.validation", 400);
   const locale = normalizeLocale(gate.user.locale);
-  const { location, mealContext, budget, craving, page } = parsed.data;
+  const { location, mealContext, budget, craving, page, lat, lng } = parsed.data;
 
-  const geo = await geocode({
-    address: location,
-    locale,
-    providers: providersForPin(51.5, -0.1),
-  });
-
-  let pinLat: number | undefined = geo.data?.lat;
-  let pinLng: number | undefined = geo.data?.lng;
-  const providers =
-    pinLat != null && pinLng != null
-      ? providersForPin(pinLat, pinLng)
-      : providersForPin(51.5, -0.1);
-
-  const search = await searchRestaurants({
-    near: pinLat != null && pinLng != null ? { lat: pinLat, lng: pinLng } : undefined,
-    address: pinLat == null ? location : undefined,
-    query: craving || "restaurant",
-    providers,
-    locale,
-  });
-
-  if (!search.ok) {
-    return authError(search.outcome?.key ?? "errors.provider_failed", 502);
-  }
-
-  const cards = search.data ?? [];
-  if (pinLat == null && cards[0]?.location) {
-    pinLat = cards[0].location.lat;
-    pinLng = cards[0].location.lng;
-  }
   const profile =
     gate.user.tasteProfile ??
     (await prisma.tasteProfile.create({ data: { userId: gate.user.id } }));
-  const picks = rankPicks(cards, tastesFromProfile(profile), {
-    budget,
-    mealContext,
-    pinLat,
-    pinLng,
-  });
 
-  const updatedAt = new Date().toISOString();
+  let run;
+  try {
+    run = await fetchDecideCards({
+      criteria: { location, mealContext, budget, craving, lat, lng },
+      locale,
+      tastes: tastesFromProfile(profile),
+    });
+  } catch (err) {
+    const key = err instanceof Error ? err.message : "errors.provider_failed";
+    return authError(key, 502);
+  }
+
   const payload: SearchCachePayload = {
-    picks,
+    picks: run.picks,
+    rankOrder: run.rankOrder,
+    sort: run.sort,
     cursor: 0,
-    criteria: { location, mealContext, budget, craving, lat: pinLat, lng: pinLng },
-    updatedAt,
+    criteria: {
+      location,
+      mealContext,
+      budget,
+      craving,
+      lat: run.pinLat,
+      lng: run.pinLng,
+    },
+    updatedAt: run.updatedAt,
+    skipped: run.skipped,
+    partialBanner: run.partialBanner,
   };
 
   await prisma.searchCache.deleteMany({ where: { userId: gate.user.id } });
@@ -93,15 +80,23 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const { slice, from, to, total } = paginatePicks(picks, page);
+  const { picks, from, to, total } = sliceDecidePicks({
+    picks: payload.picks,
+    rankOrder: payload.rankOrder,
+    sort: payload.sort,
+    page,
+  });
+
   return NextResponse.json({
     searchId: cache.id,
-    picks: slice,
+    picks,
     total,
     from,
     to,
-    updatedAt,
-    skipped: [...(geo.skipped ?? []), ...(search.skipped ?? [])],
-    empty: total === 0,
+    updatedAt: run.updatedAt,
+    skipped: run.skipped,
+    partialBanner: run.partialBanner,
+    empty: run.empty,
+    sort: payload.sort,
   });
 }

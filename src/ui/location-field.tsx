@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useId, useState, type ReactNode } from "react";
-import { useT } from "@/src/i18n/use-t";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useLocale, useT } from "@/src/i18n/use-t";
+import { isCoordString, parseCoordString } from "@/src/core/location";
 
 type Status = "detecting" | "ok" | "failed";
 
@@ -10,6 +11,7 @@ type Props = {
   name?: string;
   value: string;
   onChange: (value: string) => void;
+  onResolved?: (label: string, lat: number, lng: number) => void;
   required?: boolean;
   testId?: string;
   showStatus?: boolean;
@@ -24,11 +26,27 @@ const LOCATE_ICON = (
   </svg>
 );
 
+async function resolveCoords(
+  lat: number,
+  lng: number,
+  locale: string,
+): Promise<{ label: string; lat: number; lng: number } | null> {
+  const res = await fetch("/api/geocode/reverse", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ lat, lng, locale }),
+  });
+  if (!res.ok) return null;
+  return (await res.json()) as { label: string; lat: number; lng: number };
+}
+
 export function LocationField({
   id = "location",
   name = "location",
   value,
   onChange,
+  onResolved,
   required,
   testId,
   showStatus = true,
@@ -36,14 +54,33 @@ export function LocationField({
   action,
 }: Props) {
   const t = useT();
+  const locale = useLocale();
   const listId = useId();
   const [status, setStatus] = useState<Status>(initialStatus ?? (value ? "ok" : "detecting"));
   const [loading, setLoading] = useState(false);
+  const [labelFailed, setLabelFailed] = useState(false);
+  const backfillAttempted = useRef(false);
 
   const suggestions = t("eat.register.location_suggestions")
     .split("|")
     .map((s) => s.trim())
     .filter(Boolean);
+
+  async function applyCoords(lat: number, lng: number) {
+    setLabelFailed(false);
+    setStatus("detecting");
+    const resolved = await resolveCoords(lat, lng, locale);
+    if (resolved?.label) {
+      setStatus("ok");
+      onChange(resolved.label);
+      onResolved?.(resolved.label, resolved.lat, resolved.lng);
+      return;
+    }
+    setStatus("ok");
+    setLabelFailed(true);
+    onChange(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+    onResolved?.(`${lat.toFixed(4)}, ${lng.toFixed(4)}`, lat, lng);
+  }
 
   useEffect(() => {
     if (initialStatus || value) return;
@@ -53,15 +90,20 @@ export function LocationField({
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setStatus("ok");
-        if (!value.trim()) {
-          onChange(`${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
-        }
+        void applyCoords(pos.coords.latitude, pos.coords.longitude);
       },
       () => setStatus("failed"),
       { timeout: 8000 },
     );
-  }, [initialStatus, onChange, value]);
+  }, [initialStatus, value]);
+
+  useEffect(() => {
+    if (!value || !isCoordString(value) || backfillAttempted.current) return;
+    backfillAttempted.current = true;
+    const coords = parseCoordString(value);
+    if (!coords) return;
+    void applyCoords(coords.lat, coords.lng);
+  }, [value]);
 
   function detect() {
     if (!navigator.geolocation) {
@@ -73,8 +115,7 @@ export function LocationField({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLoading(false);
-        setStatus("ok");
-        onChange(`${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
+        void applyCoords(pos.coords.latitude, pos.coords.longitude);
       },
       () => {
         setLoading(false);
@@ -95,6 +136,7 @@ export function LocationField({
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
+          setLabelFailed(false);
           if (e.target.value.trim()) setStatus("ok");
         }}
         placeholder={t("eat.register.location_placeholder")}
@@ -132,6 +174,11 @@ export function LocationField({
                 ? t("eat.register.location_detected")
                 : t("eat.register.location_failed")}
           </p>
+          {labelFailed ? (
+            <p className="hint location-status" role="status">
+              {t("eat.register.location_label_failed")}
+            </p>
+          ) : null}
           {status === "failed" ? (
             <p className="hint location-status" data-location-failed role="status">
               {t("eat.register.location_failed")}

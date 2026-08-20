@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "defaultLat" DOUBLE PRECISION,
+ADD COLUMN "defaultLng" DOUBLE PRECISION;

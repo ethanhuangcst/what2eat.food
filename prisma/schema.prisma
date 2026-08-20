@@ -16,6 +16,8 @@ model User {
   age                  Int?
   photoUrl             String?
   defaultLocation      String?
+  defaultLat           Float?
+  defaultLng           Float?
   locale               String        @default("EN")
   resetTokenHash       String?
   resetTokenExpiresAt  DateTime?

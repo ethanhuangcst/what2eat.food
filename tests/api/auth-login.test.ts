@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import { POST as loginRoute } from "../../app/api/auth/login/route";
 import { bffRequest, readJson } from "../helpers/http-bff";
+import { getTestCookie } from "../setup";
 import { registerTestUser, TEST_USER } from "../helpers/test-user";
+import { POST as registerRoute } from "../../app/api/auth/register/route";
 
 describe("POST /api/auth/login", () => {
   it("should_login_with_valid_credentials", async () => {
@@ -28,6 +30,33 @@ describe("POST /api/auth/login", () => {
       }),
     );
     expect(res.status).toBe(401);
+  });
+
+  it("should_set_locale_cookie_from_user_profile_on_login", async () => {
+    const email = "locale.login@what2eat.food";
+    const res = await registerRoute(
+      bffRequest("/api/auth/register", {
+        method: "POST",
+        body: {
+          name: "Locale Login",
+          email,
+          password: TEST_USER.password,
+          confirmPassword: TEST_USER.password,
+          locale: "CN",
+        },
+      }),
+    );
+    expect(res.status).toBe(200);
+    await readJson(res);
+
+    const loginRes = await loginRoute(
+      bffRequest("/api/auth/login", {
+        method: "POST",
+        body: { email, password: TEST_USER.password },
+      }),
+    );
+    expect(loginRes.status).toBe(200);
+    expect(getTestCookie("what2eat_locale")).toBe("CN");
   });
 
   it("should_reject_csrf", async () => {

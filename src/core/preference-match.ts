@@ -1,4 +1,6 @@
-import { type PlaceCard, type FitLevel, type PickDto } from "../places-agent/types";
+import { type PlaceCard, type FitLevel, type PickDto, type PriceLevel, PRICE_LEVELS } from "../places-agent/types";
+import { providerListRank } from "./vendor-priority";
+import { type VendorRegion } from "./region";
 
 export type TasteInput = {
   likes: string[];
@@ -32,6 +34,11 @@ function walkMinutes(distanceKm: number): number {
 function cardKey(card: PlaceCard): string {
   const primary = card.sources[0];
   return `${primary?.provider ?? card.provider}:${primary?.native_id ?? card.name}`;
+}
+
+function normalizePriceLevel(value: unknown): PriceLevel | undefined {
+  if (typeof value !== "string") return undefined;
+  return (PRICE_LEVELS as readonly string[]).includes(value) ? (value as PriceLevel) : undefined;
 }
 
 export function matchPick(
@@ -104,6 +111,7 @@ export function matchPick(
     name: card.name,
     address: card.address,
     rating: card.rating ?? card.tripadvisor?.rating,
+    priceLevel: normalizePriceLevel(card.price_level),
     photoUrl: card.photos?.[0],
     category: card.category,
     fit,
@@ -114,9 +122,28 @@ export function matchPick(
   };
 }
 
-export function rankPicks(cards: PlaceCard[], tastes: TasteInput, ctx: DecideContext): PickDto[] {
+export function rankPicks(
+  cards: PlaceCard[],
+  tastes: TasteInput,
+  ctx: DecideContext,
+  region?: VendorRegion,
+): PickDto[] {
   const order = { strong: 0, partial: 1, weak: 2 } as const;
   return cards
     .map((c) => matchPick(c, tastes, ctx))
-    .sort((a, b) => order[a.fit] - order[b.fit] || (b.rating ?? 0) - (a.rating ?? 0));
+    .sort((a, b) => {
+      const byFit = order[a.fit] - order[b.fit];
+      if (byFit !== 0) return byFit;
+      if (region === "cn_mainland") {
+        const byVendor = providerListRank(a.provider, region) - providerListRank(b.provider, region);
+        if (byVendor !== 0) return byVendor;
+      }
+      const byRating = (b.rating ?? 0) - (a.rating ?? 0);
+      if (byRating !== 0) return byRating;
+      if (region && region !== "cn_mainland") {
+        const byVendor = providerListRank(a.provider, region) - providerListRank(b.provider, region);
+        if (byVendor !== 0) return byVendor;
+      }
+      return a.name.localeCompare(b.name, "en");
+    });
 }

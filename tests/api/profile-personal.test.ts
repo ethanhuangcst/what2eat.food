@@ -44,6 +44,28 @@ describe("/api/profile/personal", () => {
     expect(body.defaultLocation).toBe("Shoreditch, London");
   });
 
+  it("should_persist_default_lat_lng", async () => {
+    await registerTestUser();
+    await loginTestUser();
+    const res = await invokeRoute(
+      putPersonal,
+      authedRequest("/api/profile/personal", {
+        method: "PUT",
+        body: {
+          name: TEST_USER.name,
+          email: TEST_USER.email,
+          defaultLocation: "Central, Hong Kong",
+          defaultLat: 22.3193,
+          defaultLng: 114.1694,
+        },
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = await readJson<{ defaultLat: number; defaultLng: number }>(res);
+    expect(body.defaultLat).toBe(22.3193);
+    expect(body.defaultLng).toBe(114.1694);
+  });
+
   it("should_reject_photo_too_large", async () => {
     await registerTestUser();
     await loginTestUser();

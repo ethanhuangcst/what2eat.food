@@ -26,6 +26,8 @@ const saveSchema = z.object({
   provider: z.string().min(1),
   nativeId: z.string().min(1),
   snapshot: z.record(z.string(), z.unknown()),
+  area: z.string().optional(),
+  mealContext: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -49,6 +51,17 @@ export async function POST(request: NextRequest) {
     },
     update: { snapshot: parsed.data.snapshot as unknown as Prisma.InputJsonValue },
   });
+
+  await prisma.decisionHistory.create({
+    data: {
+      userId: gate.user.id,
+      placeSnapshot: parsed.data.snapshot as unknown as Prisma.InputJsonValue,
+      area: parsed.data.area,
+      mealContext: parsed.data.mealContext,
+      outcome: "went",
+    },
+  });
+
   return NextResponse.json({ ok: true, id: row.id });
 }
 

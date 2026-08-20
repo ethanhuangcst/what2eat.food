@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useT } from "@/src/i18n/use-t";
+import { isPresetChipId } from "@/src/core/chip-selection";
 
 type ChipOption = { id: string; labelKey: string; variant?: "like" | "dislike" | "" };
 
@@ -18,12 +19,11 @@ export function ChipField({ options, selected, onChange, addPlaceholderKey, addL
   const t = useT();
   const [draft, setDraft] = useState("");
 
-  function toggle(labelKey: string) {
-    const label = t(labelKey);
-    if (selected.includes(label)) {
-      onChange(selected.filter((v) => v !== label));
+  function toggle(id: string) {
+    if (selected.includes(id)) {
+      onChange(selected.filter((v) => v !== id));
     } else {
-      onChange([...selected, label]);
+      onChange([...selected, id]);
     }
   }
 
@@ -34,15 +34,13 @@ export function ChipField({ options, selected, onChange, addPlaceholderKey, addL
     setDraft("");
   }
 
-  const presetLabels = new Set(options.map((o) => t(o.labelKey)));
-
   return (
     <div className="chip-add" data-testid={testId}>
       {addLabelKey ? <span className="sr-only">{t(addLabelKey)}</span> : null}
       <div className="chip-row">
         {options.map((opt) => {
           const label = t(opt.labelKey);
-          const pressed = selected.includes(label);
+          const pressed = selected.includes(opt.id);
           const cls = [
             "chip",
             "chip-toggle",
@@ -53,18 +51,18 @@ export function ChipField({ options, selected, onChange, addPlaceholderKey, addL
             .join(" ");
           return (
             <button
-              key={opt.labelKey}
+              key={opt.id}
               type="button"
               className={cls}
               aria-pressed={pressed}
-              onClick={() => toggle(opt.labelKey)}
+              onClick={() => toggle(opt.id)}
             >
               {label}
             </button>
           );
         })}
         {selected
-          .filter((v) => !presetLabels.has(v))
+          .filter((v) => !isPresetChipId(v, options))
           .map((custom) => (
             <button
               key={custom}

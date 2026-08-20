@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useT } from "@/src/i18n/use-t";
 import { persistLocale } from "@/src/i18n/locale-store";
 import { type Locale, LOCALES } from "@/src/core/locales";
 import { authJson } from "@/src/ui/auth-api";
 import { LogoLink } from "@/src/ui/logo-link";
+import { clearAllChatStorage } from "@/src/chat/local-storage";
 
 type Session = { name: string | null; photoUrl: string | null };
 
@@ -35,6 +36,7 @@ export function AppHeader() {
   }, [loadSession]);
 
   async function logout() {
+    clearAllChatStorage();
     await authJson("/api/auth/logout", { method: "POST" });
     router.push("/");
     router.refresh();

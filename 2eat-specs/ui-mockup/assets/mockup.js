@@ -398,12 +398,78 @@
     }
   }
 
+  function buildRichReplyArticle(options) {
+    var leadKey = options.leadKey || "eat.decide.chat_rich_lead";
+    var picks = options.picks || [
+      {
+        name: "Ichijuissai",
+        metaKey: "eat.decide.chat_rich_pick_1",
+        href: "https://www.google.com/maps/search/?api=1&query=Ichijuissai+Hong+Kong",
+        img: "https://images.unsplash.com/photo-1579584425555-c3ce17fd1871?w=160&h=120&fit=crop",
+      },
+      {
+        name: "Yakiniku Kagura",
+        metaKey: "eat.decide.chat_rich_pick_2",
+        href: "https://www.google.com/maps/search/?api=1&query=Yakiniku+Kagura+Hong+Kong",
+        img: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=160&h=120&fit=crop",
+      },
+    ];
+    var compact = options.compact ? " chat-rich--compact" : "";
+    var article = document.createElement("article");
+    article.className = "bubble bubble--rich chat-rich" + compact;
+    article.setAttribute("data-testid", "chat-agent-msg");
+    var label = document.createElement("p");
+    label.className = "chat-rich__label kind";
+    label.setAttribute("data-i18n", "eat.why.kind_model");
+    label.textContent = t("eat.why.kind_model");
+    article.appendChild(label);
+    var lead = document.createElement("p");
+    lead.className = "chat-rich__lead";
+    lead.setAttribute("data-i18n", leadKey);
+    lead.textContent = t(leadKey);
+    article.appendChild(lead);
+    var list = document.createElement("ul");
+    list.className = "chat-rich__cards";
+    picks.forEach(function (pick) {
+      var li = document.createElement("li");
+      li.className = "chat-pick-card";
+      li.setAttribute("data-testid", "chat-pick-card");
+      li.innerHTML =
+        '<a class="chat-pick-card__media" href="' +
+        pick.href +
+        '" target="_blank" rel="noopener noreferrer">' +
+        '<img src="' +
+        pick.img +
+        '" alt="" width="80" height="60" loading="lazy" />' +
+        "</a>" +
+        '<div class="chat-pick-card__body">' +
+        '<h3 class="chat-pick-card__name">' +
+        pick.name +
+        "</h3>" +
+        '<p class="chat-pick-card__meta" data-i18n="' +
+        pick.metaKey +
+        '">' +
+        t(pick.metaKey) +
+        "</p>" +
+        '<a class="chat-pick-card__link" href="' +
+        pick.href +
+        '" target="_blank" rel="noopener noreferrer" data-i18n="eat.chat.open_maps">' +
+        t("eat.chat.open_maps") +
+        "</a>" +
+        "</div>";
+      list.appendChild(li);
+    });
+    article.appendChild(list);
+    return article;
+  }
+
   function bindChat() {
     document.querySelectorAll("[data-chat-root]").forEach(function (root) {
       var form = root.querySelector("[data-chat-form]");
       var input = root.querySelector("[data-chat-input]");
       var log = root.querySelector("[data-transcript]");
       if (!form || !input || !log) return;
+      var isRich = root.getAttribute("data-chat-rich") === "1";
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         var text = input.value.trim();
@@ -412,12 +478,31 @@
         user.className = "bubble is-user";
         user.textContent = text;
         log.appendChild(user);
-        var reply = document.createElement("p");
-        reply.className = "bubble";
-        var replyKey = root.getAttribute("data-chat-reply-key") || "eat.chat.sample_agent";
-        reply.innerHTML =
-          '<span class="kind" data-i18n="eat.why.kind_model"></span><br />' + t(replyKey);
-        log.appendChild(reply);
+        if (isRich) {
+          var compact = root.classList.contains("place-why-chat");
+          var reply = buildRichReplyArticle({
+            compact: compact,
+            leadKey: compact ? "eat.chat.sample_rich_lead" : "eat.decide.chat_rich_lead",
+            picks: compact
+              ? [
+                  {
+                    name: "The Wolseley",
+                    metaKey: "eat.chat.sample_rich_pick",
+                    href: "https://www.google.com/maps/search/?api=1&query=The+Wolseley+London",
+                    img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=160&h=120&fit=crop",
+                  },
+                ]
+              : undefined,
+          });
+          log.appendChild(reply);
+        } else {
+          var replyPlain = document.createElement("p");
+          replyPlain.className = "bubble";
+          var replyKey = root.getAttribute("data-chat-reply-key") || "eat.chat.sample_agent";
+          replyPlain.innerHTML =
+            '<span class="kind" data-i18n="eat.why.kind_model"></span><br />' + t(replyKey);
+          log.appendChild(replyPlain);
+        }
         applyI18n();
         input.value = "";
         log.scrollTop = log.scrollHeight;
@@ -458,6 +543,38 @@
       if (e.key !== "Escape") return;
       if (panel.classList.contains("is-open")) agentChatSetOpen(false);
     });
+
+    var grip = panel.querySelector("[data-agent-chat-resize]");
+    var panelInner = panel.querySelector(".agent-chat__panel");
+    if (grip && panelInner) {
+      var drag = null;
+      var minW = 360;
+      var minH = 448;
+      grip.addEventListener("pointerdown", function (e) {
+        e.preventDefault();
+        drag = {
+          x: e.clientX,
+          y: e.clientY,
+          w: panel.getBoundingClientRect().width,
+          h: panel.getBoundingClientRect().height,
+        };
+        grip.setPointerCapture(e.pointerId);
+      });
+      grip.addEventListener("pointermove", function (e) {
+        if (!drag) return;
+        var maxW = Math.min(36 * 16, window.innerWidth - 32);
+        var maxH = Math.min(42 * 16, window.innerHeight - 32);
+        var dw = drag.x - e.clientX;
+        var dh = drag.y - e.clientY;
+        var nextW = Math.min(maxW, Math.max(minW, drag.w + dw));
+        var nextH = Math.min(maxH, Math.max(minH, drag.h + dh));
+        panel.style.width = nextW + "px";
+        panel.style.height = nextH + "px";
+      });
+      grip.addEventListener("pointerup", function () {
+        drag = null;
+      });
+    }
   }
 
   function applyQueryState() {
@@ -531,9 +648,34 @@
         dlg.classList.add("is-open");
         applyI18n();
       }
+      if (params.get("pending") === "1") {
+        var pending = document.querySelector("[data-pending-demo]");
+        if (pending) pending.hidden = false;
+      }
     }
     if (params.get("open") === "chat") {
       agentChatSetOpen(true);
+      if (params.get("tall") === "1") {
+        var agentChat = document.querySelector("[data-agent-chat]");
+        if (agentChat) agentChat.classList.add("is-tall");
+      }
+      if (params.get("pending") === "1") {
+        var listPending = document.querySelector("[data-list-pending-demo]");
+        if (listPending) listPending.hidden = false;
+      }
+      if (params.get("plain") === "1") {
+        var chatRoot = document.querySelector("[data-agent-chat] [data-chat-root]");
+        if (chatRoot) {
+          chatRoot.setAttribute("data-chat-rich", "0");
+          var transcript = chatRoot.querySelector("[data-transcript]");
+          if (transcript) {
+            transcript.innerHTML =
+              '<p class="bubble is-user" data-i18n="eat.decide.chat_sample_user"></p>' +
+              '<p class="bubble"><span class="kind" data-i18n="eat.why.kind_model"></span><br /><span data-i18n="eat.decide.chat_sample_agent"></span></p>';
+            applyI18n();
+          }
+        }
+      }
     }
   }
 

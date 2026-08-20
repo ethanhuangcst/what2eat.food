@@ -8,6 +8,7 @@ type Props = {
   pick: PickDto;
   onDetails: (pick: PickDto) => void;
   onUnsave?: (pick: PickDto) => void;
+  onOpenMap?: () => void;
   showMap?: boolean;
   testId?: string;
 };
@@ -25,7 +26,7 @@ function warningKey(warning: string): string | null {
   return null;
 }
 
-export function PickCard({ pick, onDetails, onUnsave, showMap = true, testId = "pick-card" }: Props) {
+export function PickCard({ pick, onDetails, onUnsave, onOpenMap, showMap = true, testId = "pick-card" }: Props) {
   const t = useT();
   const mapUrl = pickMapUrl(pick.sources);
   const primaryProvider = pick.provider;
@@ -103,7 +104,14 @@ export function PickCard({ pick, onDetails, onUnsave, showMap = true, testId = "
             </button>
           ) : null}
           {showMap && mapUrl ? (
-            <a className="pick-card__link" href={mapUrl} target="_blank" rel="noreferrer" data-testid="pick-map">
+            <a
+              className="pick-card__link"
+              href={mapUrl}
+              target="_blank"
+              rel="noreferrer"
+              data-testid="pick-map"
+              onClick={() => onOpenMap?.()}
+            >
               {t("eat.card.open_map")}
             </a>
           ) : null}

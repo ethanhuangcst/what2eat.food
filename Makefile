@@ -1,4 +1,4 @@
-.PHONY: help dev up down build test lint test-coverage quality db-migrate-test test-e2e-mvp1 test-e2e-mvp2-live
+.PHONY: help dev up down build test lint test-coverage quality db-migrate-test test-e2e-mvp1 test-e2e-mvp2-live test-e2e-mvp3-live test-e2e-mvp4-live
 
 .DEFAULT_GOAL := help
 
@@ -32,8 +32,8 @@ down: ## Stop local Postgres
 		brew services stop postgresql@16 || true; \
 	fi
 
-db-migrate: up ## Run Prisma migrations
-	npx prisma migrate dev --name init
+db-migrate: up ## Apply Prisma migrations to dev DB (what2eat on :5435)
+	DATABASE_URL=postgresql://what2eat:what2eat@localhost:$(PORT)/what2eat npx prisma migrate deploy
 
 db-migrate-test: up ## Create test DB and run migrations
 	@psql "postgresql://what2eat:what2eat@localhost:$(PORT)/postgres" -tc "SELECT 1 FROM pg_database WHERE datname = 'what2eat_test'" | grep -q 1 || \
@@ -59,3 +59,9 @@ test-e2e-mvp1: up ## MVP-1 Playwright journey
 
 test-e2e-mvp2-live: up ## MVP-2 live journey (what2eat + places-agent)
 	python3 e2e/run.py mvp2-live
+
+test-e2e-mvp3-live: up ## MVP-3 live journey (chat + history)
+	python3 e2e/run.py mvp3-live
+
+test-e2e-mvp4-live: up ## MVP-4 live journey (sort + reshuffle)
+	python3 e2e/run.py mvp4-live

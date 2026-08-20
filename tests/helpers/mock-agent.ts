@@ -73,5 +73,11 @@ export function defaultSearchHandlers(cards: PlaceCard[] = [SAMPLE_PLACE_A, SAMP
       if (!card) return { ok: false, outcome: { key: "errors.provider_failed" } };
       return { ok: true, data: card };
     },
+    chat: () => ({
+      ok: true,
+      data: {
+        message: { role: "assistant", content: "Here are lighter options nearby from your current list." },
+      },
+    }),
   } satisfies Record<string, Handler>;
 }

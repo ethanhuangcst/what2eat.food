@@ -16,6 +16,7 @@ import { htmlLang } from "@/src/core/locales";
 import { usePageTitle } from "@/src/ui/use-page-title";
 import { authJson } from "@/src/ui/auth-api";
 import { notifySessionChanged } from "@/src/ui/session-events";
+import { normalizeChipIds } from "@/src/core/chip-selection";
 
 const LIKE_OPTIONS = [
   "eat.cuisine.cantonese",
@@ -79,6 +80,8 @@ export default function ProfilePageClient() {
     gender: "female",
     age: "",
     defaultLocation: "",
+    defaultLat: null as number | null,
+    defaultLng: null as number | null,
     photoUrl: null as string | null,
   });
   const [likes, setLikes] = useState<string[]>([]);
@@ -117,6 +120,8 @@ export default function ProfilePageClient() {
         gender?: string;
         age?: number;
         defaultLocation?: string;
+        defaultLat?: number | null;
+        defaultLng?: number | null;
         photoUrl?: string | null;
         updatedAt?: string;
       }>("/api/profile/personal"),
@@ -137,13 +142,21 @@ export default function ProfilePageClient() {
           gender: p.gender ?? "female",
           age: p.age != null ? String(p.age) : "",
           defaultLocation: p.defaultLocation ?? "",
+          defaultLat: p.defaultLat ?? null,
+          defaultLng: p.defaultLng ?? null,
           photoUrl: p.photoUrl ?? null,
         });
         setPersonalUpdatedAt(p.updatedAt);
-        setLikes(Array.isArray(tastes.likes) ? tastes.likes : []);
-        setDislikes(Array.isArray(tastes.dislikes) ? tastes.dislikes : []);
-        setConstraints(Array.isArray(tastes.constraints) ? tastes.constraints : []);
-        setMealContexts(Array.isArray(tastes.mealContexts) ? tastes.mealContexts : []);
+        setLikes(normalizeChipIds(Array.isArray(tastes.likes) ? tastes.likes : [], LIKE_OPTIONS));
+        setDislikes(
+          normalizeChipIds(Array.isArray(tastes.dislikes) ? tastes.dislikes : [], DISLIKE_OPTIONS),
+        );
+        setConstraints(
+          normalizeChipIds(Array.isArray(tastes.constraints) ? tastes.constraints : [], CONSTRAINT_OPTIONS),
+        );
+        setMealContexts(
+          normalizeChipIds(Array.isArray(tastes.mealContexts) ? tastes.mealContexts : [], CONTEXT_OPTIONS),
+        );
         setSpice(Number(tastes.spiceLevel ?? 1) || 1);
         setPartySize(tastes.partySize ?? 2);
         setTastesUpdatedAt(tastes.updatedAt);
@@ -156,8 +169,14 @@ export default function ProfilePageClient() {
     const updated = await authJson<{ updatedAt?: string }>("/api/profile/personal", {
       method: "PUT",
       body: JSON.stringify({
-        ...personal,
+        name: personal.name,
+        email: personal.email,
+        gender: personal.gender,
         age: personal.age ? Number(personal.age) : undefined,
+        defaultLocation: personal.defaultLocation,
+        defaultLat: personal.defaultLat,
+        defaultLng: personal.defaultLng,
+        photoUrl: personal.photoUrl,
       }),
     });
     setPersonalUpdatedAt(updated.updatedAt);
@@ -253,7 +272,22 @@ export default function ProfilePageClient() {
                     <label htmlFor="location">{t("eat.register.location")}</label>
                     <LocationField
                       value={personal.defaultLocation}
-                      onChange={(v) => setPersonal({ ...personal, defaultLocation: v })}
+                      onChange={(v) =>
+                        setPersonal({
+                          ...personal,
+                          defaultLocation: v,
+                          defaultLat: null,
+                          defaultLng: null,
+                        })
+                      }
+                      onResolved={(label, lat, lng) =>
+                        setPersonal({
+                          ...personal,
+                          defaultLocation: label,
+                          defaultLat: lat,
+                          defaultLng: lng,
+                        })
+                      }
                       required
                       testId="profile-location"
                       initialStatus={personal.defaultLocation ? "ok" : undefined}

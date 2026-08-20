@@ -26,6 +26,8 @@ const registerSchema = z.object({
       const trimmed = v?.trim();
       return trimmed ? trimmed : undefined;
     }),
+  defaultLat: z.number().min(-90).max(90).optional(),
+  defaultLng: z.number().min(-180).max(180).optional(),
   password: z.string().min(8),
   confirmPassword: z.string().min(8),
   locale: z.string().optional(),
@@ -55,6 +57,10 @@ export async function POST(request: NextRequest) {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) return authError("errors.email_taken", 409);
   const passwordHash = await hashPassword(data.password);
+  const latLng =
+    data.defaultLat != null && data.defaultLng != null
+      ? { defaultLat: data.defaultLat, defaultLng: data.defaultLng }
+      : {};
   const user = await prisma.user.create({
     data: {
       email,
@@ -62,6 +68,7 @@ export async function POST(request: NextRequest) {
       gender: data.gender,
       age: data.age,
       defaultLocation: data.defaultLocation?.trim() ?? null,
+      ...latLng,
       passwordHash,
       locale: normalizeLocale(data.locale),
       tasteProfile: { create: {} },

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/src/db/client";
 import { verifyPassword } from "@/src/core/crypto";
-import { writeSession } from "@/src/auth/session";
+import { writeLocaleCookie, writeSession } from "@/src/auth/session";
 import { csrfOk } from "@/src/auth/csrf";
 import { authError, normalizeEmail } from "@/src/auth/user";
+import { normalizeLocale } from "@/src/core/locales";
 
 export async function POST(request: NextRequest) {
   if (!csrfOk(request)) return authError("errors.csrf", 403);
@@ -18,5 +19,6 @@ export async function POST(request: NextRequest) {
     return authError("errors.login_failed", 401);
   }
   await writeSession({ userId: user.id, email: user.email });
+  await writeLocaleCookie(normalizeLocale(user.locale));
   return NextResponse.json({ ok: true, name: user.name });
 }

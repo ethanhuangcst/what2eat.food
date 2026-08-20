@@ -1,4 +1,6 @@
 import { type PickDto } from "../places-agent/types";
+import { type DecideSortMode } from "./sort-picks";
+import { type PartialBanner } from "./partial-banner";
 
 export const DECIDE_PAGE_SIZE = 6;
 
@@ -6,9 +8,13 @@ const PAGE_SIZE = DECIDE_PAGE_SIZE;
 
 export type SearchCachePayload = {
   picks: PickDto[];
+  rankOrder: string[];
+  sort: DecideSortMode;
   cursor: number;
   criteria: Record<string, unknown>;
   updatedAt: string;
+  skipped?: { provider: string; reason_key: string }[];
+  partialBanner?: PartialBanner | null;
 };
 
 export function paginatePicks(

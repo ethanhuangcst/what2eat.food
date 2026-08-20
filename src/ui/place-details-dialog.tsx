@@ -5,6 +5,7 @@ import { useLocale, useT } from "@/src/i18n/use-t";
 import { htmlLang, type Locale } from "@/src/core/locales";
 import { pickMapUrl } from "@/src/core/map-links";
 import { type PlaceCard, type PickDto } from "@/src/places-agent/types";
+import { PlaceChatBlock } from "@/src/ui/place-chat-block";
 
 type Props = {
   place: PlaceCard;
@@ -17,6 +18,7 @@ type Props = {
   onToggleSave: () => void;
   onUnsave: () => void;
   onSelectAlternative?: (pick: PickDto) => void;
+  onOpenMap?: () => void;
 };
 
 function formatTime(iso: string | undefined, locale: Locale): string {
@@ -39,6 +41,7 @@ export function PlaceDetailsDialog({
   onToggleSave,
   onUnsave,
   onSelectAlternative,
+  onOpenMap,
 }: Props) {
   const t = useT();
   const locale = useLocale();
@@ -84,7 +87,7 @@ export function PlaceDetailsDialog({
               {photo ? (
                 <img src={photo} alt="" width={420} height={320} loading="lazy" />
               ) : (
-                <div style={{ height: 320, background: "color-mix(in srgb, var(--line) 40%, var(--plate))" }} />
+                <div className="place-split__media--empty" aria-hidden="true" />
               )}
             </div>
             <div className="place-split__info">
@@ -184,18 +187,36 @@ export function PlaceDetailsDialog({
               ) : null}
               <p className="place-why-note">{t("eat.details.why_note")}</p>
             </div>
+            <PlaceChatBlock
+              context={{
+                provider: pick.provider,
+                nativeId: pick.nativeId,
+                name: place.name,
+                address: place.address,
+                category: place.category,
+                photoUrl: place.photos?.[0] ?? pick.photoUrl,
+                rating: place.rating ?? pick.rating,
+                mapUrl: mapUrl ?? undefined,
+              }}
+            />
           </div>
         </section>
 
         <div className="dialog-actions">
           {mapUrl ? (
-            <a className="btn" href={mapUrl} target="_blank" rel="noreferrer">
+            <a
+              className="btn"
+              href={mapUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => onOpenMap?.()}
+            >
               {t("eat.card.open_map")}
             </a>
           ) : null}
           {variant === "decide" ? (
             <button type="button" className="btn btn-quiet" data-testid="place-save" onClick={onToggleSave}>
-              {saved ? t("eat.card.unsave") : t("eat.card.save")}
+              {saved ? t("eat.card.saved") : t("eat.card.save")}
             </button>
           ) : (
             <button type="button" className="btn btn-quiet" data-testid="details-unsave" onClick={onUnsave}>

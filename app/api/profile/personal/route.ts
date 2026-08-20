@@ -16,6 +16,8 @@ const personalSchema = z.object({
   gender: z.string().optional(),
   age: z.coerce.number().int().min(1).max(120).optional(),
   defaultLocation: z.string().min(1),
+  defaultLat: z.number().min(-90).max(90).optional().nullable(),
+  defaultLng: z.number().min(-180).max(180).optional().nullable(),
   photoUrl: z
     .string()
     .optional()
@@ -33,6 +35,8 @@ export async function GET(request: NextRequest) {
     gender: u.gender,
     age: u.age,
     defaultLocation: u.defaultLocation,
+    defaultLat: u.defaultLat,
+    defaultLng: u.defaultLng,
     photoUrl: u.photoUrl,
     locale: u.locale,
     updatedAt: u.updatedAt.toISOString(),
@@ -54,6 +58,7 @@ export async function PUT(request: NextRequest) {
     });
     if (taken) return authError("errors.email_taken", 409);
   }
+  const latProvided = parsed.data.defaultLat != null && parsed.data.defaultLng != null;
   const updated = await prisma.user.update({
     where: { id: gate.user.id },
     data: {
@@ -62,6 +67,8 @@ export async function PUT(request: NextRequest) {
       gender: parsed.data.gender,
       age: parsed.data.age,
       defaultLocation: parsed.data.defaultLocation.trim(),
+      defaultLat: latProvided ? parsed.data.defaultLat : null,
+      defaultLng: latProvided ? parsed.data.defaultLng : null,
       photoUrl: parsed.data.photoUrl || null,
     },
   });
@@ -71,6 +78,8 @@ export async function PUT(request: NextRequest) {
     gender: updated.gender,
     age: updated.age,
     defaultLocation: updated.defaultLocation,
+    defaultLat: updated.defaultLat,
+    defaultLng: updated.defaultLng,
     photoUrl: updated.photoUrl,
     updatedAt: updated.updatedAt.toISOString(),
   });
