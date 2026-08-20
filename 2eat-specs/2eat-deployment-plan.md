@@ -184,7 +184,7 @@ MVP-2 DoD：agent `PLACES_VENDOR_MODE=live`。`make down` 停止 compose + app�
 
 **MVP-3：** 列表/详情 chat 真实回复；刷新后 localStorage 仍在、登出清除；Postgres 无 chat 行；History。
 
-**MVP-4：** sort + reshuffle 重查；chat resize/rich/pending；place 内滚动；价格档；Decide 条件草稿跨 locale；chat 尺寸持久化。
+**MVP-4（产品 DoD 2026-08-21）：** sort + reshuffle 重查；chat resize/rich/pending；place 内滚动；价格档；Decide 条件草稿跨 locale；chat 尺寸持久化。Prod 部署仍按本节后续步骤（与产品签收分离）。
 
 每轮 spot-check ≥1 既有 app（如 `places.agent-mate.ai/v1/health`）。
 

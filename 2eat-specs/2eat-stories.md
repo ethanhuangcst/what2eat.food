@@ -43,7 +43,7 @@
 | **MVP-1** | Onboarding product: shell, home, account, profile | **1–13** | Visitor registers → saves profile → signs out/in → profile persists; locale EN→HK | **Complete** |
 | **MVP-2** | Decide with real places: search, cards, details, save | **14–19, 21–22, 24–26** | 已登录用户 runs Decide on a real pin → real vendor cards → details + why → save → Saved → unsave | **Complete** |
 | **MVP-3** | Agent chat + history (chat history browser-local only) | **20, 23, 27** | 列表 chat + place chat with real agent replies → transcripts survive refresh → cleared on logout → History | **Complete**（2026-08-20 签收） |
-| **MVP-4** | Polish Decide + chat UX（**产品收尾切片**） | **28–35** (+ **decide-03** behavior update) | Sort; reshuffle 重查; list chat resize/rich/pending; place chat scroll; price on cards; criteria draft across locale; persist chat panel size | **Complete**（pending user confirm） |
+| **MVP-4** | Polish Decide + chat UX（**产品收尾切片**） | **28–35** (+ **decide-03** behavior update) | Sort; reshuffle 重查; list chat resize/rich/pending; place chat scroll; price on cards; criteria draft across locale; persist chat panel size | **Complete**（2026-08-21 签收） |
 
 **构建顺序：** MVP-1 → MVP-2 → MVP-3 → MVP-4（each slice to DoD before the next）。one user story to DoD at a time within each slice. **MVP-4 为 what2eat 当前计划内最后一切片**（Dismiss / cool-off 仍明确不在范围）。
 
@@ -53,7 +53,7 @@
 
 **MVP-3 说明：** Chat uses `POST /v1/chat` via BFF (HTTP-only). Transcripts in browser-local storage only — verified in E2E and contract tests (no DB rows). **DoD 已通过**（`make test-e2e-mvp3-live`，2026-08-20 Clerkenwell；lessons: [`what2eat-mvp3-lessons.md`](../../workspace-specs/knowledge/web-app-development/what2eat-mvp3-lessons.md)）。
 
-**MVP-4 说明：** Sort + reshuffle 重查 vendor；chat UX（NW napkin grip resize、rich blocks、pending、place 内滚动）；卡片/详情价格；Decide 条件草稿跨 locale（[ADR-029](../../workspace-specs/adr/ADR-029-decide-criteria-draft-hydrate.md)）；list chat 尺寸持久化。部分代码可能已合入主干，**故事状态以本表 To-do / DoD 为准**，未签收前不算 Complete。
+**MVP-4 说明：** Sort + reshuffle 重查 vendor；chat UX（NW napkin grip resize、rich blocks、pending、place 内滚动）；卡片/详情价格；Decide 条件草稿跨 locale（[ADR-029](../../workspace-specs/adr/ADR-029-decide-criteria-draft-hydrate.md)）；list chat 尺寸持久化。**DoD 已通过**（`make test-e2e-mvp4-live` + 用户可用性确认 2026-08-21；follow-ups：chat timeout、provider 与 Decide 对齐、ADR-031 空 AMAP→Google、card-first hydrate）。
 
 ---
 
@@ -61,7 +61,7 @@
 
 Feature 按 **MVP** 排序 以便MVP-1 items stay grouped.
 
-**状态列：** `Done` 表示该 feature 已通过 story DoD（含 live 探针与用户确认）。未交付默认为 `To-do`。MVP-1–3 签收后对应 features 标 **Done**；MVP-4 在 DoD 通过前保持 **To-do**。此处不用 `In progress` 或 `live-honest` — live 姿态见 [`2eat-test-plan.md`](./2eat-test-plan.md) 诚实性矩阵。
+**状态列：** `Done` 表示该 feature 已通过 story DoD（含 live 探针与用户确认）。未交付默认为 `To-do`。MVP-1–4 签收后对应 features 标 **Done**。此处不用 `In progress` 或 `live-honest` — live 姿态见 [`2eat-test-plan.md`](./2eat-test-plan.md) 诚实性矩阵。
 
 | 编号 | 模块 | Feature code | 功能名 | 功能描述 | Story | MVP | 状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- |

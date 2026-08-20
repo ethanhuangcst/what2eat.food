@@ -103,15 +103,15 @@ MVP-1 不调 agent，但仍需真实 DB、真实 session、真实邮件路径（
 | 用户 | 明确可用性确认 — **confirmed** |
 | Retrospective | [`what2eat-mvp3-lessons.md`](../../workspace-specs/knowledge/web-app-development/what2eat-mvp3-lessons.md)；ADR-027 / ADR-028 |
 
-### MVP-4 — 排序、chat UX、价格、条件草稿、尺寸持久化 — **Complete**（pending user confirm）
+### MVP-4 — 排序、chat UX、价格、条件草稿、尺寸持久化 — **Complete**（2026-08-21 签收）
 
 | 门禁 | 要求 |
 | --- | --- |
 | 功能 | sort；reshuffle 重查；list chat napkin-corner resize + rich + pending；place chat 内滚动；`price_level`；Decide 条件草稿跨 locale（decide-10/11）；chat 尺寸 localStorage（chat-05） |
-| 测试 | `make test`（149）+ **`make test-e2e-mvp4-live`** — **passed** 2026-08-20 |
+| 测试 | `make test`（149）+ **`make test-e2e-mvp4-live`** — **passed**（用户确认已跑；基线 2026-08-20） |
 | 质量 | 价格仅来自 agent；无则 honest missing；chat 卡片图/链仅 BFF hydrate；profile 默认不覆盖已编辑条件 |
-| 用户 | 明确可用性确认 — **pending** |
-| Retrospective | [`what2eat-mvp4-lessons.md`](../../workspace-specs/knowledge/web-app-development/what2eat-mvp4-lessons.md)；ADR-029（drafts）；无新 ADR |
+| 用户 | 明确可用性确认 — **confirmed** 2026-08-21 |
+| Retrospective | [`what2eat-mvp4-lessons.md`](../../workspace-specs/knowledge/web-app-development/what2eat-mvp4-lessons.md) + follow-ups；ADR-029（drafts）；ADR-031（空 AMAP→Google，places-agent） |
 
 ---
 
