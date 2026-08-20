@@ -14,6 +14,9 @@ export type PlaceSource = {
   deeplinks?: Record<string, string>;
 };
 
+export const PRICE_LEVELS = ["FREE", "$", "$$", "$$$", "$$$$"] as const;
+export type PriceLevel = (typeof PRICE_LEVELS)[number];
+
 export type PlaceCard = {
   provider: string;
   primary_provider?: string;
@@ -25,6 +28,7 @@ export type PlaceCard = {
   category?: string;
   phone?: string;
   photos?: string[];
+  price_level?: PriceLevel;
   sources: PlaceSource[];
   tripadvisor?: {
     rating?: number;
@@ -44,7 +48,7 @@ export type SearchRestaurantsInput = {
   query?: string;
   near?: { lat: number; lng: number };
   address?: string;
-  providers: string[];
+  providers?: string[];
   locale: string;
   enrichTripadvisor?: boolean;
 };
@@ -58,6 +62,7 @@ export type PickDto = {
   name: string;
   address?: string;
   rating?: number;
+  priceLevel?: PriceLevel;
   photoUrl?: string;
   category?: string;
   fit: FitLevel;
