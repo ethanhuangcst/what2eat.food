@@ -46,7 +46,7 @@ AC 细节见 [`2eat-stories.md`](./2eat-stories.md)。
 | **Home** | 公开落地页、注册/登录 CTA |
 | **Account** | 注册、登录、重置/设置密码 |
 | **Profile** | 个人信息；口味/约束/用餐场景（分卡保存）；预算在 Decide 填写 |
-| **Decide** | 搜索条件；短名单 + 更新时间；**排序**（rank/rating/distance/price）；**Reshuffle**（重查 vendor）；分页；卡片（含 **价格档**）；空态/部分 vendor banner；列表 chat（可 resize；助手 **rich** pick 卡 + 地图新标签；**pending** 等待态） |
+| **Decide** | 搜索条件；短名单 + 更新时间；**排序**（rank/rating/distance/price）；**Reshuffle**（重查 vendor）；分页；卡片（含 **价格档**）；空态/部分 vendor banner；列表 chat（可 resize 且 **尺寸可持久化**；助手 **rich** pick 卡 + 地图新标签；**pending** 等待态）；**条件草稿跨 locale** |
 | **Place details** | 对话框：事实（含价格）、Why、Also nearby、详情 chat（内滚动 + pending）、Open map、Save |
 | **Saved / History** | 收藏列表；决策历史（Went、再跑 Decide） |
 

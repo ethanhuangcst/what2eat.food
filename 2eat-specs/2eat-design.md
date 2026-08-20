@@ -198,7 +198,7 @@ Mutating 路由：session + CSRF。Caller key 仅服务端 env。
 
 ### 2.8 MVP 实现顺序
 
-与 [`2eat-stories.md`](./2eat-stories.md) 一致：MVP-1 账号/profile → MVP-2 Decide+详情+收藏 → MVP-3 chat+历史 → MVP-4 排序+reshuffle + chat resize/rich/pending+scroll + 卡片展示 `price_level`。
+与 [`2eat-stories.md`](./2eat-stories.md) 一致：MVP-1 账号/profile → MVP-2 Decide+详情+收藏 → MVP-3 chat+历史 → **MVP-4（收尾）** 排序+reshuffle + chat resize/rich/pending/scroll + 价格 + Decide 条件草稿 + chat 尺寸持久化。
 
 ---
 
@@ -213,7 +213,7 @@ Mutating 路由：session + CSRF。Caller key 仅服务端 env。
 | `/login` | `03-login.html` | email/password | `login-submit` | account-02 |
 | `/reset-password` | `04-reset.html` | 发信 / sent callout | — | account-03 |
 | `/set-password` | `05-set-password.html` | 新密码 / 过期态 | — | account-04 |
-| `/decide` | `06-decide.html` | 搜索区、结果头、sort、卡 grid（含价格档）、分页、partial banner、FAB chat | `agent-chat-open`, `agent-chat-close`, `agent-chat-resize`, `chat-agent-msg`, `chat-pending`, `chat-pick-card`, `pick-price`, `decide-location`, pick 卡上 `data-open-dialog` | decide-01–10, chat-02–04, place-01–04, header-*, footer-01 |
+| `/decide` | `06-decide.html` | 搜索区、结果头、sort、卡 grid（含价格档）、分页、partial banner、FAB chat | `agent-chat-open`, `agent-chat-close`, `agent-chat-resize`, `chat-agent-msg`, `chat-pending`, `chat-pick-card`, `pick-price`, `decide-location`, pick 卡上 `data-open-dialog` | decide-01–11, chat-02–05, place-01–04, header-*, footer-01 |
 | `/profile` | `07-profile.html` | 个人信息卡 + 口味卡（分 save） | — | profile-01, profile-02 |
 | `/saved` | `08-saved.html` | pick grid、空态 | — | saved-01, saved-02 |
 | `/history` | `09-history.html` | Went 行、再跑 Decide；header Saved active | — | history-01 |
@@ -221,7 +221,7 @@ Mutating 路由：session + CSRF。Caller key 仅服务端 env。
 ### 3.1 Decide 布局要点
 
 - **搜索表单：** area/pin · meal context（preset key + 自定义文本，见 `meal-contexts`）· budget per person · craving · `Find restaurants`。
-- **地区草稿（decide-10）：** 输入框值按 **URL → sessionStorage 草稿 → SearchCache criteria → profile default（仅 virgin）** 填充；切 locale / `router.refresh()` 不得用 profile 默认覆盖已输入内容。草稿键：`w2e.decide.draft.location`（session）。
+- **地区草稿（decide-10）+ 其他条件草稿（decide-11）：** 输入框值按 **URL → sessionStorage 草稿 → SearchCache criteria → profile/default（仅 virgin）** 填充；切 locale / `router.refresh()` 不得用默认覆盖已输入内容。键：`w2e.decide.draft.location|meal|budget|craving`。[ADR-029](../../workspace-specs/adr/ADR-029-decide-criteria-draft-hydrate.md)。
 - **结果头：** `Results (last updated {time})` · **Sort** 控件（`eat.decide.sort.*`：rank / rating / distance / price）· **Reshuffle** · `{shown}–{end} of {total}`。
 - **Partial banner：** 当某 provider skip 时显示；文案须与仍展示的卡片 provider 一致（decide-06 AC）。
 - **Sort（decide-08）：** 换 sort 重置到第 1 页；新 Find restaurants 重置为 By rank；大陆默认 rank 下相同 fit 时 **AMAP 优先于 GOOGLE_MAPS**。
@@ -284,7 +284,7 @@ Mutating 路由：session + CSRF。Caller key 仅服务端 env。
 
 **不做：** 绿色小方块按钮、半透明细斜线、装饰性 L 角标叠阴影（上一版已否）。
 
-**不**把自定义尺寸写入 localStorage（刷新后恢复默认；后续可做）。
+**不**在 chat-02 强制持久化；**chat-05** 将宽高写入 `localStorage`（键如 `w2e.chat.panelSize`），刷新后恢复；仍受 min/max 约束。登出时建议与 transcript 一并清除。
 
 **Place chat（详情内）：** 同样 transcript + bottom composer；**不**拖拽 resize。chat 盒高度受约束（§3.7）；`.place-why-chat__transcript` 内滚动。
 
@@ -391,6 +391,8 @@ idle → (user send) → pending → (ok) assistant bubble
 
 ### 3.8 价格展示（`decide-09`）
 
+**Agent 前提（已 live 确认 2026-08-20）：** `search_restaurants` 卡片可带 `price_level`；AMAP 常带 `price_per_person`。覆盖非 100% — UI 必须诚实缺失。探针：[`price-level-live.md`](../../workspace-specs/knowledge/maps/price-level-live.md)。
+
 | 表面 | 有 `price_level` | 无 |
 | --- | --- | --- |
 | Pick card | `eat.card.price` + band；可选 `eat.card.price_per_person` | `eat.card.price_unavailable` |
@@ -399,6 +401,7 @@ idle → (user send) → pending → (ok) assistant bubble
 - **不**在客户端把预算文本反推成 `$$`
 - `price_per_person` 仅透传 agent 数值；格式用 locale number（元单位文案在 key 内）
 - Sort **By price** 继续用 `priceLevel`（decide-08）
+- BFF：`PlaceCard.price_level` → `PickDto.priceLevel`；实现 decide-09 时补 `price_per_person` 透传
 
 ---
 

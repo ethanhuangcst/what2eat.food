@@ -11,7 +11,7 @@
 | 技术设计 | [`2eat-design.md`](./2eat-design.md) |
 | UI mock-up | [`ui-mockup/`](./ui-mockup/) |
 | 家族架构 | [`../../workspace-specs/2.architecture.md`](../../workspace-specs/2.architecture.md) |
-| places-agent backlog | [`../../1.places-agent/agent-specs/1.agent-stories.md`](../../1.places-agent/agent-specs/1.agent-stories.md) |
+| places-agent backlog | [`../../1.places-agent/agent-specs/agent-stories.md`](../../1.places-agent/agent-specs/agent-stories.md) |
 
 **状态：** draft — 与 [`ui-mockup/`](./ui-mockup/) 当前 mock-up 对齐。
 
@@ -36,22 +36,24 @@
 
 ## MVP 计划
 
-三个切片。 每个 MVP 是**可独立交付的完整功能集** with its own E2E sign-off. **MVP DoD 禁止 fixture、mock 或假餐厅数据** — use a real what2eat stack, real user DB, and (from MVP-2 onward) **places-agent in live vendor mode**. Details: [`2eat-test-plan.md`](./2eat-test-plan.md) §1.2, [`2eat-design.md`](./2eat-design.md) §12.
+四个切片。每个 MVP 是**可独立交付的完整功能集** with its own E2E sign-off. **MVP DoD 禁止 fixture、mock 或假餐厅数据** — use a real what2eat stack, real user DB, and (from MVP-2 onward) **places-agent in live vendor mode**. Details: [`2eat-test-plan.md`](./2eat-test-plan.md) §1.2, [`2eat-design.md`](./2eat-design.md) §12.
 
 | 切片 | 成果 | Features | E2E 旅程（摘要） | 状态 |
 | --- | --- | --- | --- | --- |
 | **MVP-1** | Onboarding product: shell, home, account, profile | **1–13** | Visitor registers → saves profile → signs out/in → profile persists; locale EN→HK | **Complete** |
 | **MVP-2** | Decide with real places: search, cards, details, save | **14–19, 21–22, 24–26** | 已登录用户 runs Decide on a real pin → real vendor cards → details + why → save → Saved → unsave | **Complete** |
 | **MVP-3** | Agent chat + history (chat history browser-local only) | **20, 23, 27** | 列表 chat + place chat with real agent replies → transcripts survive refresh → cleared on logout → History | **Complete**（2026-08-20 签收） |
-| **MVP-4** | Decide sort + reshuffle + chat UX + price display + location draft | **28–33** (+ **decide-03** behavior update) | Sort; reshuffle; list chat resize/rich; place chat pending+scroll; show vendor `price_level`; preserve Decide location across locale switch | To-do |
+| **MVP-4** | Polish Decide + chat UX（**产品收尾切片**） | **28–35** (+ **decide-03** behavior update) | Sort; reshuffle 重查; list chat resize/rich/pending; place chat scroll; price on cards; criteria draft across locale; persist chat panel size | To-do |
 
-**构建顺序：** MVP-1 → MVP-2 → MVP-3 → MVP-4（each slice to DoD before the next）。one user story to DoD at a time within each slice.
+**构建顺序：** MVP-1 → MVP-2 → MVP-3 → MVP-4（each slice to DoD before the next）。one user story to DoD at a time within each slice. **MVP-4 为 what2eat 当前计划内最后一切片**（Dismiss / cool-off 仍明确不在范围）。
 
 **MVP-1 说明：** No places-agent dependency. Auth and profile use the real app DB and real session cookies. Email flows use Resend sandbox or dev outbox — not a fake “success” banner without a server path.
 
 **MVP-2 说明：** BFF calls places-agent HTTP only ([ADR-020](../../workspace-specs/adr/ADR-020-http-only-chat-and-enrich.md)). DoD requires live probe: restaurant names/ids from vendors, **no `fixture_` native ids** ([ADR-021](../../workspace-specs/adr/ADR-021-live-vendor-no-fixture.md)). Chat deferred to MVP-3.
 
 **MVP-3 说明：** Chat uses `POST /v1/chat` via BFF (HTTP-only). Transcripts in browser-local storage only — verified in E2E and contract tests (no DB rows). **DoD 已通过**（`make test-e2e-mvp3-live`，2026-08-20 Clerkenwell；lessons: [`what2eat-mvp3-lessons.md`](../../workspace-specs/knowledge/web-app-development/what2eat-mvp3-lessons.md)）。
+
+**MVP-4 说明：** Sort + reshuffle 重查 vendor；chat UX（NW napkin grip resize、rich blocks、pending、place 内滚动）；卡片/详情价格；Decide 条件草稿跨 locale（[ADR-029](../../workspace-specs/adr/ADR-029-decide-criteria-draft-hydrate.md)）；list chat 尺寸持久化。部分代码可能已合入主干，**故事状态以本表 To-do / DoD 为准**，未签收前不算 Complete。
 
 ---
 
@@ -96,8 +98,10 @@ Feature 按 **MVP** 排序 以便MVP-1 items stay grouped.
 | 31 | Chat | `chat-04` | Pending + place chat scroll | Waiting indicator while agent replies; place chat transcript scrolls inside a fixed chat box | [§31 chat-04](#31-chat-chat-04--pending--place-chat-scroll) | **MVP-4** | To-do |
 | 32 | Decide | `decide-09` | Show price on cards | Display agent `price_level` (and optional `price_per_person`) on pick cards and place details — honest missing when absent | [§32 decide-09](#32-decide-decide-09--show-price-on-cards) | **MVP-4** | To-do |
 | 33 | Decide | `decide-10` | Keep location draft | Area/pin input keeps the latest typed value across locale switches; profile default fills only once when virgin | [§33 decide-10](#33-decide-decide-10--keep-location-draft) | **MVP-4** | To-do |
+| 34 | Decide | `decide-11` | Keep other criteria drafts | Meal context, budget, craving keep latest input across locale switches (same draft rules as location) | [§34 decide-11](#34-decide-decide-11--keep-other-criteria-drafts) | **MVP-4** | To-do |
+| 35 | Chat | `chat-05` | Persist chat panel size | Remember list chat width/height in localStorage across refresh (min still default floor) | [§35 chat-05](#35-chat-chat-05--persist-chat-panel-size) | **MVP-4** | To-do |
 
-Backlog 为 **features 1–33**（含 decide-08–10、chat-02–04）。 Dismiss / cool-off (hide a pick for a cooldown period) is **out of scope** — not a TBD slice.
+Backlog 为 **features 1–35**（MVP-4 = **28–35** + decide-03 行为更新）。Dismiss / cool-off **永久不在范围**。
 
 ---
 
@@ -566,7 +570,7 @@ As an operator, 我希望place-scoped chat orchestration to stay stateless on th
 - **AC2:** 给定 the pin is outside mainland China, 当 cards are built, 则 `sources[]` is ordered GOOGLE_MAPS / TRIPADVISOR before AMAP.
 - **AC3:** 给定 the pin is in mainland China, 当 the default rank sort applies, 则 picks with **AMAP** as primary provider appear before **GOOGLE_MAPS** picks at the same fit level (even 当 Google has a higher rating).
 
-**Dependencies:** places-agent returns optional `price_level` on search/detail cards (`FREE` | `$` | `$$` | `$$$` | `$$$$`). Display of the band on cards is **decide-09**; sort uses the same field.
+**Dependencies:** places-agent returns optional `price_level` on search/detail cards (`FREE` | `$` | `$$` | `$$$` | `$$$$`). **Live 2026-08-20:** field present on a majority of Google/AMAP sample cards ([`price-level-live.md`](../../workspace-specs/knowledge/maps/price-level-live.md)). Display of the band on cards is **decide-09**; sort uses the same field.
 
 ---
 
@@ -596,7 +600,7 @@ As an operator, 我希望place-scoped chat orchestration to stay stateless on th
 - **AC1:** 给定 place chat 在详情对话框内, 当消息与 composer 同屏, 则 composer 下方无大块空白。
 - **AC2:** （详见 **chat-04**）多轮对话时 transcript 在 chat 盒内滚动，不把整页对话框撑到必须拖动才能看到输入框。
 
-**Out of scope（本 story）：** 持久化用户自定义尺寸到 localStorage（可后续 enhancement）。
+**Out of scope（本 story）：** 无 — 尺寸持久化见 **chat-05**。
 
 ---
 
@@ -680,7 +684,7 @@ As an operator, 我希望place-scoped chat orchestration to stay stateless on th
 
 - **AC1:** 给定 **By price** sort（decide-08）, 当 live 数据含 `price_level`, 则有价格的店按档位升序；仍无价格的排末尾（行为不变，覆盖率提高）。
 
-**Dependencies:** places-agent 已输出 `price_level`；可选 `price_per_person`（AMAP）。what2eat `PlaceCard` / `PickDto` 需透传 `price_per_person`（若尚未）。
+**Dependencies:** places-agent **已确认 live 输出** `price_level`（2026-08-20 探针：Google ~55%、AMAP ~60% 覆盖；见 [`price-level-live.md`](../../workspace-specs/knowledge/maps/price-level-live.md)）；可选 `price_per_person`（AMAP）。what2eat `PlaceCard` / `PickDto` 需透传 `price_per_person`（当前 types 仅有 `priceLevel`，decide-09 实现时补）。
 
 ---
 
@@ -708,7 +712,36 @@ As an operator, 我希望place-scoped chat orchestration to stay stateless on th
 - Profile hydrate 必须检查：URL → session draft → criteria → profile default；且尊重 `locationTouched`。
 - 不写入 profile（改输入 ≠ 改默认地址）；持久默认仍走 Profile 页保存。
 
-**Out of scope：** meal / budget / craving 的 locale 保留（本 story 只锁 location）；跨浏览器标签同步。
+**Out of scope：** 跨浏览器标签同步；把 Decide 草稿写回 Profile 默认地址。
+
+---
+
+## 34. Decide · `decide-11` — Keep other criteria drafts
+
+**用户故事 1 — Meal / budget / craving survive locale switch**
+
+作为 Decide 用户, 我希望切换语言后用餐场景、人均预算、craving 仍显示我刚输入的内容 以便与地区框行为一致。
+
+- **AC1:** 给定我已编辑 meal context / budget / craving 中任一项, 当切换 locale 后, 则对应控件值仍为切换前最新输入（含清空后的空值）。
+- **AC2:** 给定 URL 带 `?meal=` / `?budget=` / `?craving=`, 当打开 Decide 再切 locale, 则 URL 值优先且不被 profile / 默认 preset 覆盖。
+- **AC3:** 给定字段仍 virgin（无草稿、未编辑）, 当首次 hydrate, 则可用 SearchCache criteria 或产品默认（meal preset）；**不得**在已有草稿后用默认盖写。
+
+**实现：** 与 decide-10 相同 sessionStorage 模式与 hydrate 顺序（[ADR-029](../../workspace-specs/adr/ADR-029-decide-criteria-draft-hydrate.md)）。草稿键建议：`w2e.decide.draft.meal` / `budget` / `craving`。
+
+---
+
+## 35. Chat · `chat-05` — Persist chat panel size
+
+**用户故事 1 — Remember resized list chat**
+
+作为使用 list chat 的用户, 我希望刷新页面后仍保留我拖到的面板宽高 以便不必每次重调。
+
+- **AC1:** 给定我已用 NW grip 把面板调到大于最小值, 当刷新 Decide 再打开 chat, 则宽高恢复为上次尺寸（夹在 min/max token 内）。
+- **AC2:** 给定 localStorage 无记录或值非法, 当打开 chat, 则使用默认 `22.5rem × 28rem`。
+- **AC3:** 给定登出, 当清除 chat transcript keys 时, **可**同时清除尺寸键（实现二选一并写死：登出清 / 登出保留；推荐登出清，与 chat 隐私一致）。
+- **AC4:** 存储键 i18n 无关（如 `w2e.chat.panelSize`）；仅存宽高数字，不存文案。
+
+**Dependencies:** chat-02 resize 行为已存在。
 
 ---
 
@@ -721,7 +754,7 @@ As an operator, 我希望place-scoped chat orchestration to stay stateless on th
 | `03-login.html` (+ error variant) | account-02, footer-02 |
 | `04-reset.html` | account-03, footer-02 |
 | `05-set-password.html` (+ expired) | account-04, footer-02 |
-| `06-decide.html` (+ empty, partial, `?open=details`, `?open=details&pending=1`, `?open=chat`, `?open=chat&pending=1`, `?open=chat&tall=1`, `?open=chat&plain=1`) | decide-01–10, place-01–04, chat-02–04, header-*, footer-01 |
+| `06-decide.html` (+ empty, partial, `?open=details`, `?open=details&pending=1`, `?open=chat`, `?open=chat&pending=1`, `?open=chat&tall=1`, `?open=chat&plain=1`) | decide-01–11, place-01–04, chat-02–05, header-*, footer-01 |
 | `07-profile.html` | profile-01, profile-02, footer-01 |
 | `08-saved.html` (+ empty) | saved-01, saved-02, place-01–04, footer-01 |
 | `09-history.html` (+ empty) | history-01, footer-01 |
