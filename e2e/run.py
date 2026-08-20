@@ -21,6 +21,14 @@ def agent_ready() -> bool:
         return False
 
 
+def app_ready() -> bool:
+    try:
+        with urllib.request.urlopen("http://localhost:3020/decide", timeout=2) as resp:
+            return resp.status < 500
+    except Exception:
+        return False
+
+
 def run(script: str) -> int:
     env = os.environ.copy()
     env.setdefault("W2E_BASE_URL", "http://localhost:3020")
@@ -53,10 +61,13 @@ def main() -> int:
             agent_server = (
                 f'--server "agent|cd {AGENT_ROOT} && PORT=3010 npm run dev|http://localhost:3010/v1/health" '
             )
+        app_server = ""
+        if not app_ready():
+            app_server = '--server "app|npm run dev|http://localhost:3020/" '
         cmd = (
             f"python3 scripts/with_server.py "
             f"{agent_server}"
-            f'--server "app|npm run dev|http://localhost:3020/" '
+            f"{app_server}"
             f"-- python3 e2e/test_mvp2_live.py"
         )
         return subprocess.call(cmd, shell=True, cwd=ROOT)

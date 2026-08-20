@@ -1,6 +1,8 @@
 import { type PickDto } from "../places-agent/types";
 
-const PAGE_SIZE = 6;
+export const DECIDE_PAGE_SIZE = 6;
+
+const PAGE_SIZE = DECIDE_PAGE_SIZE;
 
 export type SearchCachePayload = {
   picks: PickDto[];

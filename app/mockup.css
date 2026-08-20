@@ -2435,8 +2435,10 @@ input[type="range"] {
   gap: 0.35rem;
 }
 
-.place-alt-list a {
+.place-alt-list a,
+.place-alt-list button.place-alt-list__link {
   display: block;
+  width: 100%;
   padding: 0.45rem 0.55rem;
   border-radius: 0.65rem;
   background: color-mix(in srgb, var(--cloth-a) 50%, var(--plate));
@@ -2445,9 +2447,13 @@ input[type="range"] {
   font-size: 0.8125rem;
   line-height: 1.35;
   text-decoration: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
 }
 
-.place-alt-list a:hover {
+.place-alt-list a:hover,
+.place-alt-list button.place-alt-list__link:hover {
   border-color: var(--glaze);
   color: var(--glaze);
 }

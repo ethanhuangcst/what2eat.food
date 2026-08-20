@@ -3,6 +3,7 @@ import { prisma } from "@/src/db/client";
 import { authError, requireUser } from "@/src/auth/user";
 import { normalizeLocale } from "@/src/core/locales";
 import { getPlaceDetails } from "@/src/places-agent/client";
+import { nearbyAlternatives } from "@/src/core/nearby-alternatives";
 import { rankPicks } from "@/src/core/preference-match";
 import { type SearchCachePayload } from "@/src/core/short-list";
 
@@ -58,9 +59,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     },
   });
 
+  const cachePicks = (cache?.payload as SearchCachePayload | undefined)?.picks ?? [];
+  const alternatives = nearbyAlternatives(cachePicks, {
+    provider: source,
+    nativeId: decodeURIComponent(nativeId),
+  });
+
   return NextResponse.json({
     place: details.data,
     pick,
     saved: Boolean(saved),
+    alternatives,
   });
 }

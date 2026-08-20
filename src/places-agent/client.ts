@@ -1,5 +1,6 @@
 import "server-only";
 import { AGENT_ID } from "../core/locales";
+import { placesAgentBaseUrl, placesAgentCallerKey } from "./config";
 import {
   type AgentEnvelope,
   type GeocodeResult,
@@ -9,17 +10,7 @@ import {
 
 export type FetchFn = typeof fetch;
 
-function baseUrl(): string {
-  const url = process.env.PLACES_AGENT_BASE_URL;
-  if (!url) throw new Error("PLACES_AGENT_BASE_URL is required");
-  return url.replace(/\/$/, "");
-}
-
-function callerKey(): string {
-  const key = process.env.PLACES_AGENT_CALLER_KEY;
-  if (!key) throw new Error("PLACES_AGENT_CALLER_KEY is required");
-  return key;
-}
+export { placesAgentBaseUrl, placesAgentCallerKey, placesAgentTarget } from "./config";
 
 function timeoutMs(): number {
   return Number(process.env.PLACES_AGENT_TIMEOUT_MS ?? 25000);
@@ -39,16 +30,22 @@ async function postV1<T>(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs());
   try {
-    const res = await fetchFn(`${baseUrl()}/v1/${tool}`, {
+    const res = await fetchFn(`${placesAgentBaseUrl()}/v1/${tool}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${callerKey()}`,
+        Authorization: `Bearer ${placesAgentCallerKey()}`,
       },
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-    const envelope = (await res.json()) as AgentEnvelope<T>;
+    const text = await res.text();
+    let envelope: AgentEnvelope<T>;
+    try {
+      envelope = (text ? JSON.parse(text) : { agent: AGENT_ID, ok: false }) as AgentEnvelope<T>;
+    } catch {
+      return { agent: AGENT_ID, ok: false, outcome: { key: "errors.provider_failed" } };
+    }
     if (envelope.agent !== AGENT_ID) {
       throw new Error("Invalid agent response");
     }

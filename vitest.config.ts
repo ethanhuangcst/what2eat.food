@@ -19,6 +19,8 @@ export default defineConfig({
       FEATURE_EMAIL: "false",
       PUBLIC_BASE_URL: "http://localhost:3020",
       APP_URL: "http://localhost:3020",
+      PLACES_AGENT_BASE_URL: "http://agent.test",
+      PLACES_AGENT_CALLER_KEY: "pa_test_contract_key",
     },
     coverage: {
       provider: "v8",

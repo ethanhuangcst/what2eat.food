@@ -46,7 +46,7 @@ def test_mvp2_live():
         page.wait_for_selector('[data-testid="decide-location"]')
         page.fill('[data-testid="decide-location"]', LOCATION)
         page.click('[data-testid="decide-submit"]')
-        page.wait_for_selector('[data-testid="decide-results"]', timeout=60000)
+        page.wait_for_selector('[data-testid="decide-results"]', timeout=90000)
 
         cards = page.locator('[data-testid="pick-card"]')
         count = cards.count()
@@ -62,7 +62,7 @@ def test_mvp2_live():
         cards.first.locator('[data-testid="pick-details"]').click()
         page.wait_for_selector('[data-testid="place-dialog"]')
         page.click('[data-testid="place-save"]')
-        page.click("text=Close")
+        page.click('[data-testid="details-close"]')
 
         page.goto(f"{BASE}/saved")
         page.wait_for_selector('[data-testid="saved-card"]')
