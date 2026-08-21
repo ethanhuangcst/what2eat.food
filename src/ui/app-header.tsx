@@ -64,11 +64,15 @@ export function AppHeader() {
         <Link href="/decide" className={pathname.startsWith("/decide") ? "is-active" : ""} data-testid="nav-decide">
           {t("eat.nav.decide")}
         </Link>
+        <Link
+          href="/saved"
+          className={pathname.startsWith("/saved") || pathname.startsWith("/history") ? "is-active" : ""}
+          data-testid="nav-saved"
+        >
+          {t("eat.nav.saved")}
+        </Link>
         <Link href="/profile" className={pathname.startsWith("/profile") ? "is-active" : ""} data-testid="nav-profile">
           {t("eat.nav.profile")}
-        </Link>
-        <Link href="/saved" className={pathname.startsWith("/saved") ? "is-active" : ""} data-testid="nav-saved">
-          {t("eat.nav.saved")}
         </Link>
       </nav>
       <div className="app-user">

@@ -42,7 +42,7 @@ AC 细节见 [`2eat-stories.md`](./2eat-stories.md)。
 
 | 域 | 内容 |
 | --- | --- |
-| **Shell** | 登录后 sticky header（Decide / Profile / Saved、问候、locale、登出）；全站 **places.family** footer |
+| **Shell** | 登录后 sticky header（Decide / Saved / Profile、问候、locale、登出）；全站 **places.family** footer |
 | **Home** | 公开落地页、注册/登录 CTA |
 | **Account** | 注册、登录、重置/设置密码 |
 | **Profile** | 个人信息；口味/约束/用餐场景（分卡保存）；预算在 Decide 填写 |

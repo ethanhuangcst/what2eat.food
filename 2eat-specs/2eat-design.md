@@ -60,9 +60,11 @@ CJK：**獅尾腿圓**。`CN` → 簡體；`HK`/`TW` → 繁體（独立目录�
 | --- | --- | --- |
 | 公开首页 | `/` | 居中列，无 app nav；CTA 有 session 则 `/decide`，否则 register/login |
 | Auth | register / login / reset / set-password | 窄列 `--max-auth`；family footer 与页面布无缝 |
-| App | decide / profile / saved / history | Sticky header；问候 + avatar + locale + 登出 |
+| App | decide / saved / profile / history | Sticky header；问候 + avatar + locale + 登出 |
 
-**App 导航（i18n key）：** `eat.nav.decide` · `eat.nav.profile` · `eat.nav.saved`；History 从 Saved 工具栏进入（`eat.nav.history`），非第四顶栏项。
+**App 导航（i18n key，顺序固定）：** `eat.nav.decide` · `eat.nav.saved` · `eat.nav.profile`；History 从 Saved 工具栏进入（`eat.nav.history`），非第四顶栏项（History 页仍标 Saved 为当前）。
+
+`eat.nav.profile` 文案：EN `Profile` · CN **用户档** · HK/TW **用戶檔**（曾用「定口味」，已弃用）。
 
 **places.family footer：** 单行 `places.family:` · where2play（新标签）· what2eat.food（当前，非链接）· places.agent-mate.ai（新标签）· copyright。公开页透明无底边；App 页 `.family-footer--app` 与 header 同底纹。**Footer 拉丁字体固定 12px**，换 locale 不改变 mark 尺寸。
 

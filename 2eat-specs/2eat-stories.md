@@ -65,7 +65,7 @@ Feature 按 **MVP** 排序 以便MVP-1 items stay grouped.
 
 | 编号 | 模块 | Feature code | 功能名 | 功能描述 | Story | MVP | 状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Header | `header-01` | App header & navigation | Sticky header on signed-in pages: logo, Decide / Profile / Saved, active section, mobile menu | [§1 header-01](#1-header-header-01--app-header--navigation) | **MVP-1** | Done |
+| 1 | Header | `header-01` | App header & navigation | Sticky header on signed-in pages: logo, Decide / Saved / Profile, active section, mobile menu | [§1 header-01](#1-header-header-01--app-header--navigation) | **MVP-1** | Done |
 | 2 | Header | `header-02` | 已登录用户 chrome | Greeting with display name, avatar initial, Log out | [§2 header-02](#2-header-header-02--signed-in-user-chrome) | **MVP-1** | Done |
 | 3 | Header | `header-03` | Locale switcher (app) | EN / CN / HK / TW switcher in the app header | [§3 header-03](#3-header-header-03--locale-switcher-app) | **MVP-1** | Done |
 | 4 | Footer | `footer-01` | Family footer (app) | places.family row on signed-in pages, styled like the app header | [§4 footer-01](#4-footer-footer-01--family-footer-app) | **MVP-1** | Done |
@@ -111,11 +111,12 @@ Backlog 为 **features 1–35**（MVP-4 = **28–35** + decide-03 行为更新�
 
 **用户故事 1 — Navigate between main sections**
 
-作为已登录用户, 我希望navigation between Decide, Profile, and Saved 以便I can move through the app without losing context.
+作为已登录用户, 我希望navigation between Decide, Saved, and Profile 以便I can move through the app without losing context.
 
-- **AC1:** 给定 I am signed in, 当 I open any app page, 则 Decide, Profile, and Saved are available in the header navigation.
+- **AC1:** 给定 I am signed in, 当 I open any app page, 则 the header navigation shows Decide, Saved, and Profile **in that order**.
 - **AC2:** 给定 I am on Decide, 当 the page loads, 则 Decide is indicated as the current section.
-- **AC3:** 给定 I am on a narrow viewport, 当 I open the mobile menu, 则 the same navigation destinations are reachable.
+- **AC3:** 给定 I am on a narrow viewport, 当 I open the mobile menu, 则 the same navigation destinations are reachable in the same order.
+- **AC4:** 给定 I am on History, 当 the page loads, 则 Saved is indicated as the current section (History is not a fourth top-level item).
 
 ---
 
