@@ -142,7 +142,7 @@ Pull：**Recreate + Pull**（仅 Update 可能不拉新 `latest`）。
 
 ### 禁止在此栈
 
-`OPENAI_*`、`AMAP_*`、`GOOGLE_MAPS_*`、`GMAPS_MCP_*`、`TRIPADVISOR_*`、`NEXT_PUBLIC_PLACES_AGENT_*` — 均在 places-agent 或浏览器外。
+`AMAP_*`、`GOOGLE_MAPS_*`、`GMAPS_MCP_*`、`TRIPADVISOR_*`、`NEXT_PUBLIC_PLACES_AGENT_*` — 均在 places-agent 或浏览器外。本栈可有服务端 `QWEN_*`（ADR-047；Decide chat 仍走 agent）。`OPENAI_*` 仅作回退，勿删。
 
 ---
 

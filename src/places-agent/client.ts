@@ -163,14 +163,6 @@ export async function getPlaceDetails(input: {
   return postV1<PlaceCard>("get_place_details", input);
 }
 
-export async function navigate(input: {
-  provider: string;
-  native_id: string;
-  locale: string;
-}): Promise<AgentEnvelope<{ url: string }>> {
-  return postV1<{ url: string }>("navigate", input);
-}
-
 export type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
 
 export async function chat(input: {

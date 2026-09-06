@@ -28,7 +28,7 @@
 | 术语 | 含义 | 不是 |
 | --- | --- | --- |
 | **场所事实** | Name, address, rating, phone, hours, etc. from map vendors via places-agent | Preference-match copy or chat suggestions |
-| **偏好匹配** | BFF labels (strong / partial / weak fit) and “why it fits” reasons from profile + Decide context | A separate ranking product or Quanzil score |
+| **偏好匹配** | BFF labels (strong / partial / weak fit) and “why it fits” reasons from profile + Decide context | A separate ranking product or OPENAI_CN score |
 | **短名单** | Paginated picks from the latest search for the current criteria | The full vendor result set |
 | **列表 chat** | Agent chat about the current Decide list and filters | Place-scoped chat inside details |
 | **详情 chat** | Agent chat about one restaurant inside the details dialog | The only way to search |
@@ -203,7 +203,7 @@ Backlog 为 **features 1–35**（MVP-4 = **28–35** + decide-03 行为更新�
 
 作为new user, 我希望to register with my basics and default location 以便Decide can start near where I usually eat.
 
-- **AC1:** 给定 I complete required fields (name, email, gender, default location, password, confirm password), 当 I submit registration, 则 an account is created and I can continue to profile setup. Age is optional.
+- **AC1:** 给定 I complete required fields (name, email, password, confirm password), 当 I submit registration, 则 an account is created and I can continue to profile setup. Gender, age, and default location are optional.
 - **AC2:** 给定 I leave a required field empty, 当 I submit, 则 registration does not complete and I see which field needs attention.
 - **AC3:** 给定 I optionally add a profile photo, 当 registration succeeds, 则 the photo is stored with my account and the signed-in header shows a circular photo thumbnail 当 available.
 

@@ -219,7 +219,9 @@ export default function ProfilePageClient() {
               <div className="register-card__grid">
                 <div className="register-card__fields">
                   <div className="field">
-                    <label htmlFor="name">{t("eat.register.name")}</label>
+                    <label htmlFor="name" className="is-required">
+                      {t("eat.register.name")}
+                    </label>
                     <input
                       id="name"
                       value={personal.name}
@@ -230,7 +232,9 @@ export default function ProfilePageClient() {
                   </div>
                   <div className="field">
                     <div className="field-label-row">
-                      <label htmlFor="email">{t("eat.register.email")}</label>
+                      <label htmlFor="email" className="is-required">
+                        {t("eat.register.email")}
+                      </label>
                       <span className="field-label-note">{t("eat.register.email_hint")}</span>
                     </div>
                     <input
@@ -269,7 +273,9 @@ export default function ProfilePageClient() {
                     </div>
                   </div>
                   <div className="field" data-location-field>
-                    <label htmlFor="location">{t("eat.register.location")}</label>
+                    <label htmlFor="location" className="is-required">
+                      {t("eat.register.location")}
+                    </label>
                     <LocationField
                       value={personal.defaultLocation}
                       onChange={(v) =>

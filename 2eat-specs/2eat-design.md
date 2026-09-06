@@ -2,6 +2,8 @@
 
 **what2eat**（`what2eat.food`）视觉、技术架构与页面契约。产品边界见 [`2eat-prod-specs.md`](./2eat-prod-specs.md)；用户故事与 AC 见 [`2eat-stories.md`](./2eat-stories.md)；测试见 [`2eat-test-plan.md`](./2eat-test-plan.md)。家族架构摘要见 [`../../workspace-specs/2.architecture.md`](../../workspace-specs/2.architecture.md)（thin client、同源 BFF、ADR-001/002）。
 
+**主 LLM（ADR-047）：** 本应用 BFF 若调用 chat/completions，用 **Qwen**（`QWEN_*`，默认 `qwen-plus`）。Decide chat 仍经 places-agent `/v1/chat`（agent 侧同样优先 Qwen）。`QWEN_API_KEY` 为空时回退 `OPENAI_*`。
+
 **冲突优先级：** 与 [`ui-mockup/`](./ui-mockup/) + `mockup.css` 冲突时，**以 mock 为准**。`index.html`、`10-why.html` 非产品路由。
 
 ---
@@ -62,15 +64,17 @@ CJK：**獅尾腿圓**。`CN` → 簡體；`HK`/`TW` → 繁體（独立目录�
 | Auth | register / login / reset / set-password | 窄列 `--max-auth`；family footer 与页面布无缝 |
 | App | decide / saved / profile / history | Sticky header；问候 + avatar + locale + 登出 |
 
+**App 壳水平对齐：** `.app-header` 顶栏背景通栏；`.app-header__inner` 与 `.app-main` 共用 `--max-app`（72rem）+ `1.25rem` 边距，使 logo→登出与 Decide 内容同宽。Logo 相对内轨左移 3px（视觉光学对齐）。见 [`ui-mockup/LAYOUT-header-rail.md`](./ui-mockup/LAYOUT-header-rail.md)。
+
 **App 导航（i18n key，顺序固定）：** `eat.nav.decide` · `eat.nav.saved` · `eat.nav.profile`；History 从 Saved 工具栏进入（`eat.nav.history`），非第四顶栏项（History 页仍标 Saved 为当前）。
 
 `eat.nav.profile` 文案：EN `Profile` · CN **用户档** · HK/TW **用戶檔**（曾用「定口味」，已弃用）。
 
-**places.family footer：** 单行 `places.family:` · where2play（新标签）· what2eat.food（当前，非链接）· places.agent-mate.ai（新标签）· copyright。公开页透明无底边；App 页 `.family-footer--app` 与 header 同底纹。**Footer 拉丁字体固定 12px**，换 locale 不改变 mark 尺寸。
+**places.family footer：** 轨宽 `--max-app`；三列栅格——中间居中 `places.family:` · where2play（新标签）· what2eat.food（当前，非链接）· places.agent-mate.ai（新标签）；右列 copyright 右对齐。公开页透明无底边；App 页 `.family-footer--app` 与 header 同底纹。**Footer 拉丁字体固定 12px**，换 locale 不改变 mark 尺寸。
 
 ### 1.4 组件要点
 
-- **Header：** mark + 导航 + `eat.header.hello` + 圆形 avatar（有 photo 则缩略图）+ locale（10.5rem 四等分）+ Logout（min-width 5.75rem）。
+- **Header：** mark + 导航 + `eat.header.hello` + 圆形 avatar（有 photo 则缩略图）+ locale（10.5rem 四等分）+ Logout（min-width 5.75rem）。结构：通栏 `.app-header` + 内轨 `.app-header__inner`（与 main 同宽）。
 - **按钮：** Primary（glaze）· Quiet（plate+边框）· Danger outline · Text link。
 - **字段错误：** `.field.is-invalid` + `.field-error` + `role="alert"`；控件背景保持 `--plate`。Email 唯一性冲突仅标在 email 字段。
 - **Pick card：** 名称、评分、`sources[]`（mono、不翻译）、类型、地址、**仅 fit badge**、步行/警告、Details + Open map（或 Unsave）。菜系/Why 在详情对话框。
@@ -121,7 +125,7 @@ App DB ← users, profile, saved, history（无 chat 表）
 | Prisma + **PostgreSQL**（ADR-023） | 用户、口味、收藏、历史 |
 | Resend | 重置密码邮件 |
 | Vitest + Python Playwright | 单测/契约 + E2E |
-| places-agent `fetch` 客户端 | **无** MCP、**无** 浏览器 Quanzil |
+| places-agent `fetch` 客户端 | **无** MCP、**无** 浏览器 LLM 密钥 |
 
 入口：`next dev` / standalone `node server.js`（非 places-agent 式 `server.ts`）。
 

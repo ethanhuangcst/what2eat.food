@@ -20,7 +20,7 @@
 | --- | --- | --- |
 | **Web 应用** | 账号、偏好、Decide UX、卡片/详情、收藏/历史、匹配文案、聊天 UX、**浏览器 本地 chat  transcript** | Map adapter、agent 管理 UI |
 | **BFF（同源）** | Session、`providers[]`、地图 deeplink 选择、偏好匹配、聊天编排（无状态） | Vendor 密钥；**持久化 chat** |
-| **places-agent** | `search_restaurants`、`get_place_details`、geocode、`navigate`、`sources[]`、可选 Tripadvisor enrich | 消费者界面、偏好 profile |
+| **places-agent** | `search_restaurants`、`get_place_details`、geocode、`sources[]`、可选 Tripadvisor enrich | 消费者界面、偏好 profile |
 
 ```text
 Browser → what2eat /api/* → places-agent HTTP (/v1)

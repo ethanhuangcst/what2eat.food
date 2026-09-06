@@ -204,10 +204,10 @@ export default function RegisterPageClient() {
                   </FieldWrap>
                   <div className="field-row field-row--demographics">
                     <div className="field field--gender">
-                      <label htmlFor="gender" className="is-required">
+                      <label htmlFor="gender">
                         {t("eat.register.gender")}
                       </label>
-                      <select id="gender" name="gender" required defaultValue="skip">
+                      <select id="gender" name="gender" defaultValue="skip">
                         <option value="male">{t("eat.register.gender_male")}</option>
                         <option value="female">{t("eat.register.gender_female")}</option>
                         <option value="other">{t("eat.register.gender_other")}</option>
