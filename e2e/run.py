@@ -10,7 +10,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-AGENT_ROOT = ROOT.parent / "1.places-agent"
+AGENT_ROOT = ROOT.parent / "places-agent"
 
 
 def agent_ready() -> bool:
