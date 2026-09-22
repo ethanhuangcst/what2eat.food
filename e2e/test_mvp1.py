@@ -75,10 +75,18 @@ def test_mvp1_journey():
 
         page.goto(f"{BASE}/profile")
         page.wait_for_selector('[data-testid="profile-likes"]')
+        # Contract is i18n keys in the hidden value, not EN display copy (BUG-001).
         page.wait_for_function(
-            '() => { const v = document.querySelector(\'[data-testid="profile-likes-value"]\')?.value || ""; return v.includes("Italian") && v.includes("ramen"); }',
+            '() => { const v = document.querySelector(\'[data-testid="profile-likes-value"]\')?.value || ""; return v.includes("eat.cuisine.italian") && v.includes("ramen"); }',
             timeout=15000,
         )
+        # Locale is still EN until the HK switch below — visible chip label resolves via i18n.
+        italian = page.locator('[data-testid="profile-likes"] button', has_text="Italian")
+        assert italian.count() >= 1
+        assert italian.first.get_attribute("aria-pressed") == "true"
+        ramen = page.locator('[data-testid="profile-likes"] button.is-custom', has_text="ramen")
+        assert ramen.count() >= 1
+        assert ramen.first.get_attribute("aria-pressed") == "true"
 
         page.goto(BASE)
         page.click('[data-testid="locale-HK"]')
