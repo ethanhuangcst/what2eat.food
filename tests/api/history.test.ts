@@ -53,4 +53,48 @@ describe("/api/history", () => {
     const res = await invokeRoute(historyGetRoute, bffRequest("/api/history"));
     expect(res.status).toBe(401);
   });
+
+  it("should_reject_history_post_when_csrf_origin_mismatches", async () => {
+    await authedSession();
+    const res = await invokeRoute(
+      historyPostRoute,
+      authedRequest("/api/history", {
+        method: "POST",
+        origin: "https://evil.example",
+        body: {
+          provider: "GOOGLE_MAPS",
+          nativeId: "ChIJ-place-a",
+          placeSnapshot: SNAPSHOT,
+        },
+      }),
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it("should_reject_history_post_when_body_invalid", async () => {
+    await authedSession();
+    const res = await invokeRoute(
+      historyPostRoute,
+      authedRequest("/api/history", {
+        method: "POST",
+        body: { provider: "GOOGLE_MAPS" },
+      }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("should_reject_unauthenticated_history_post", async () => {
+    const res = await invokeRoute(
+      historyPostRoute,
+      bffRequest("/api/history", {
+        method: "POST",
+        body: {
+          provider: "GOOGLE_MAPS",
+          nativeId: "ChIJ-place-a",
+          placeSnapshot: SNAPSHOT,
+        },
+      }),
+    );
+    expect(res.status).toBe(401);
+  });
 });

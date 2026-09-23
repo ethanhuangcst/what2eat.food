@@ -40,4 +40,28 @@ describe("/api/profile/tastes", () => {
     expect(body.likes).toContain("Italian");
     expect(body.partySize).toBe(2);
   });
+
+  it("should_reject_tastes_put_when_unauthenticated", async () => {
+    const res = await invokeRoute(
+      putTastes,
+      bffRequest("/api/profile/tastes", {
+        method: "PUT",
+        body: { likes: ["Italian"] },
+      }),
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("should_reject_tastes_put_when_party_size_invalid", async () => {
+    await registerTestUser();
+    await loginTestUser();
+    const res = await invokeRoute(
+      putTastes,
+      authedRequest("/api/profile/tastes", {
+        method: "PUT",
+        body: { likes: [], partySize: 0 },
+      }),
+    );
+    expect(res.status).toBe(400);
+  });
 });
