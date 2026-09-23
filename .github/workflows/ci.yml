@@ -64,8 +64,5 @@ jobs:
       - name: Production build
         run: make build
 
-      - name: Install Playwright Chromium
-        run: python3 -m pip install playwright && python3 -m playwright install chromium
-
-      - name: MVP-1 E2E
-        run: make test-e2e-mvp1
+      # MVP-1 E2E (`make test-e2e-mvp1`) needs a bound places-agent + Playwright
+      # browser; keep it in the local Makefile quality gate, not this fixture CI.
