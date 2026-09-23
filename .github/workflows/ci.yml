@@ -2,12 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, real-agent-refactory]
   pull_request:
-
-defaults:
-  run:
-    working-directory: 2.what2eat
+  workflow_dispatch:
 
 jobs:
   quality:
@@ -44,7 +41,7 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: 2.what2eat/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install system tools
         run: sudo apt-get update && sudo apt-get install -y postgresql-client python3-pip
